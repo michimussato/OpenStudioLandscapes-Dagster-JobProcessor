@@ -1,6 +1,9 @@
 import sys
 from importlib import metadata
 from pathlib import Path
+from dagster import get_dagster_logger
+
+LOGGER = get_dagster_logger(__name__)
 
 if sys.version_info[:2] >= (3, 11):
     # TODO: Import directly (no need for conditional) when `python_requires = >= 3.8`
@@ -23,6 +26,7 @@ try:
 
     __version__: str = version(dist.name)
 except PackageNotFoundError:  # pragma: no cover
+    LOGGER.error("Can't find metadata.distribution based on namespaces")
     __version__: str = "unknown"
 finally:
     del version, PackageNotFoundError
