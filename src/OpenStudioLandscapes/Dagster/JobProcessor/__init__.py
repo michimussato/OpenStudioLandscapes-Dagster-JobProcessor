@@ -16,13 +16,15 @@ else:
     raise RuntimeError("Python version >= 3.11 required.")
 
 try:
-    # Change here if project is renamed and does not equal the package name
-    namespace1: str = Path(__file__).parent.parent.parent.name
-    namespace2: str = Path(__file__).parent.parent.name
-    # OpenStudioLandscapes
-    package: str = Path(__file__).parent.name
-    # NukeRLM_8
-    dist: Distribution = metadata.distribution(".".join((namespace1, namespace2, package)))
+    namespace: Path = Path(__file__).parent
+    package = namespace.name
+
+    namespaces = [package]
+
+    while not namespace.name == "OpenStudioLandscapes":
+        namespaces.insert(0, namespace.name)
+        namespace = namespace.parent
+    dist: Distribution = metadata.distribution(".".join(namespaces))
 
     __version__: str = version(dist.name)
 except PackageNotFoundError:  # pragma: no cover
