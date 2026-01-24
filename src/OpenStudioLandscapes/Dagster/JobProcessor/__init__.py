@@ -16,14 +16,15 @@ else:
     raise RuntimeError("Python version >= 3.11 required.")
 
 try:
-    namespace: Path = Path(__file__).parent
-    package = namespace.name
+    package: Path = Path(__file__).parent
+    package_namespace = package.parent
+    # package = namespace.name
 
-    namespaces = [package]
+    namespaces = [package.name]
 
-    while not namespace.name == "OpenStudioLandscapes":
-        namespaces.insert(0, namespace.name)
-        namespace = namespace.parent
+    while not package_namespace.name == "OpenStudioLandscapes":
+        namespaces.insert(0, package_namespace.name)
+        package_namespace = package_namespace.parent
     dist: Distribution = metadata.distribution(".".join(namespaces))
 
     __version__: str = version(dist.name)
