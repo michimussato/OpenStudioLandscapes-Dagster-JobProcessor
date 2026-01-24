@@ -17,15 +17,20 @@ else:
 
 try:
     package: Path = Path(__file__).parent
-    package_namespace = package.parent
-    # package = namespace.name
+    package_namespaces = package.parents
 
     namespaces = [package.name]
 
-    while not package_namespace.name == "OpenStudioLandscapes":
-        namespaces.insert(0, package_namespace.name)
-        package_namespace = package_namespace.parent
+    for i in package_namespaces:
+        namespaces.insert(0, i.name)
+        if i.name == "OpenStudioLandscapes":
+            break
+
+    LOGGER.error(f"{namespaces = }")
+
     dist: Distribution = metadata.distribution(".".join(namespaces))
+
+    __version__: str = version(dist.name)
 
     __version__: str = version(dist.name)
 except PackageNotFoundError:  # pragma: no cover
