@@ -14,11 +14,12 @@ else:
 
 try:
     # Change here if project is renamed and does not equal the package name
-    namespace: str = Path(__file__).parent.parent.name
+    namespace1: str = Path(__file__).parent.parent.parent.name
+    namespace2: str = Path(__file__).parent.parent.name
     # OpenStudioLandscapes
     package: str = Path(__file__).parent.name
     # NukeRLM_8
-    dist: Distribution = metadata.distribution(".".join((namespace, package)))
+    dist: Distribution = metadata.distribution(".".join((namespace1, namespace2, package)))
 
     __version__: str = version(dist.name)
 except PackageNotFoundError:  # pragma: no cover
