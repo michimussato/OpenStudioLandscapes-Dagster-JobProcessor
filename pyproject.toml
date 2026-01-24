@@ -47,6 +47,7 @@ Homepage = "https://github.com/michimussato/OpenStudioLandscapes-Dagster-JobProc
 
 [tool.dagster]
 module_name = "OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.definitions"
+working_directory = "src"
 project_name = "OpenStudioLandscapes-Dagster-JobProcessor"
 
 #[tool.setuptools]
