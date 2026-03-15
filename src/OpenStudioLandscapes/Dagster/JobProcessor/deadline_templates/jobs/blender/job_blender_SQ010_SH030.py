@@ -1,5 +1,5 @@
 from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins import *
-from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.jobs.blender.job_blender import job
+from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.jobs.job_base import job
 from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.blender.plugin_blender__4_1_1 import plugin
 
 # Production:
