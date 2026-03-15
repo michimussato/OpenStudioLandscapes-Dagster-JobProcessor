@@ -29,17 +29,18 @@ group_name = "DEADLINE_GENERATE_JOB_SCRIPTS"
 test_jobs = ["blender", "houdini", "nuke"][0]
 
 
-GROUP_BASE_ENV = "OpenStudioLandscapes_Dagster_JobProcessor"
-KEY_BASE_ENV = [GROUP_BASE_ENV, "Constants"]
+GROUP_CONSTANTS_DEFAULT = "OpenStudioLandscapes_Dagster_JobProcessor"
+# KEY_CONSTANTS_DEFAULT = [GROUP_CONSTANTS_DEFAULT, "Constants"]
+KEY_CONSTANTS_DEFAULT = [GROUP_CONSTANTS_DEFAULT]
 
-ASSET_HEADER_BASE_ENV = {
-    "group_name": GROUP_BASE_ENV,
-    "key_prefix": KEY_BASE_ENV,
+ASSET_HEADER_CONSTANTS_DEFAULT = {
+    "group_name": GROUP_CONSTANTS_DEFAULT,
+    "key_prefix": KEY_CONSTANTS_DEFAULT,
 }
 
 
 @asset(
-    **ASSET_HEADER_BASE_ENV,
+    **ASSET_HEADER_CONSTANTS_DEFAULT,
     ins={},
 )
 def CONFIG(
@@ -466,11 +467,15 @@ def version(
     group_name=group_name,
     ins={
         "combine_dicts": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     },
 )
 def render_output_filename(
         context: AssetExecutionContext,
         combine_dicts: dict,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[dict[str, str]] | AssetMaterialization | Any, Any, None]:
 
     job_title = combine_dicts["yaml_submission"]["job_title"]
@@ -484,9 +489,11 @@ def render_output_filename(
     padding_deadline = f"{combine_dicts['yaml_submission']['plugin_dict']['submitter']['padding_deadline']}"
     padding_command = f"{combine_dicts['yaml_submission']['plugin_dict']['submitter']['padding_command']}"
 
-    # Don't uncomment
-    # Required to eval(padding_deadline) and eval(padding_command)
-    from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.settings import PADDING as EVAL_PADDING
+    # # Don't uncomment
+    # # Required to eval(padding_deadline) and eval(padding_command)
+    # from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.settings import PADDING as EVAL_PADDING
+
+    EVAL_PADDING = CONFIG.PADDING
 
     ret = {
         "padding_deadline": f"{job_title}.{eval(padding_deadline)}.{output_format}",
@@ -720,7 +727,9 @@ def props(
     group_name=group_name,
     ins={
         "read_job_py": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def handles(
