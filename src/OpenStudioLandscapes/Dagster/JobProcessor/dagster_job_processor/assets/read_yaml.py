@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any, Generator
 
+import yaml
 from dagster import (
     asset, AssetIn, MetadataValue,
     AssetMaterialization, Output,
@@ -14,6 +15,7 @@ from dagster import (
 )
 import json
 
+from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.config.models import DefaultConstants
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.resources import KitsuResource
 
 
@@ -25,6 +27,43 @@ group_name = "DEADLINE_GENERATE_JOB_SCRIPTS"
 
 
 test_jobs = ["blender", "houdini", "nuke"][0]
+
+
+GROUP_BASE_ENV = "OpenStudioLandscapes_Dagster_JobProcessor"
+KEY_BASE_ENV = [GROUP_BASE_ENV, "Constants"]
+
+ASSET_HEADER_BASE_ENV = {
+    "group_name": GROUP_BASE_ENV,
+    "key_prefix": KEY_BASE_ENV,
+}
+
+
+@asset(
+    **ASSET_HEADER_BASE_ENV,
+    ins={},
+)
+def CONFIG(
+    context: AssetExecutionContext,
+) -> Generator[
+    Output[DefaultConstants] | AssetMaterialization,
+    None,
+    None,
+]:
+
+    config: DefaultConstants = DefaultConstants()
+
+    context.log.debug(f"{config = }")
+
+    yield Output(config)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.md(
+                f"```yaml\n{yaml.safe_dump(json.loads(config.model_dump_json(fallback=str, indent=2)))}\n```"
+            ),
+        },
+    )
 
 
 class IngestJobConfig(Config):
@@ -55,7 +94,8 @@ def read_job_py(
     yield AssetMaterialization(
         asset_key="read_job_py",
         metadata={
-            "__".join(context.asset_key.path): MetadataValue.json(job),
+            # "__".join(context.asset_key.path): MetadataValue.json(job),
+            "__".join(context.asset_key.path): MetadataValue.json(json.loads(json.dumps(job, indent=2, default=str))),
         }
     )
 
@@ -189,16 +229,14 @@ def get_task_url(
     ins={
         "combine_dicts": AssetIn(),
         "version": AssetIn(),
-        "PADDING": AssetIn(),
-        "RESOLUTION_DRAFT_SCALE": AssetIn(),
+        "CONFIG": AssetIn(),
     },
 )
 def annotations_string(
         context: AssetExecutionContext,
         combine_dicts: dict,
         version: str,
-        PADDING: int,
-        RESOLUTION_DRAFT_SCALE: float,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
     """Returns the annotations string for the Deadline Draft jobs as a MaterializeResult object in the JSON format."""
 
@@ -249,14 +287,14 @@ def annotations_string(
             "type": ""
         },
         "SouthCenter": {
-            "text": f"{handles}_{str(fi_fo[0]).zfill(PADDING)}||{handles}_{str(frame_start_absolute + handles).zfill(PADDING)}|$frame|{str(frame_end_absolute - handles).zfill(PADDING)}_{handles}||{str(fi_fo[1]).zfill(PADDING)}_{handles} @{fps}",
+            "text": f"{handles}_{str(fi_fo[0]).zfill(CONFIG.PADDING)}||{handles}_{str(frame_start_absolute + handles).zfill(CONFIG.PADDING)}|$frame|{str(frame_end_absolute - handles).zfill(CONFIG.PADDING)}_{handles}||{str(fi_fo[1]).zfill(CONFIG.PADDING)}_{handles} @{fps}",
             "colorR": rgb,
             "colorG": rgb,
             "colorB": rgb,
             "type": ""
         },
         "SouthEast": {
-            "text": f"{resolution[0]}x{resolution[1]} (x{RESOLUTION_DRAFT_SCALE})",
+            "text": f"{resolution[0]}x{resolution[1]} (x{CONFIG.RESOLUTION_DRAFT_SCALE})",
             "colorR": rgb,
             "colorG": rgb,
             "colorB": rgb,
@@ -291,7 +329,7 @@ def annotations_string(
         "task_name": AssetIn(),
         "fps": AssetIn(),
         "output_format": AssetIn(),
-        "JOB_DICT_TEMPLATE": AssetIn(),
+        "CONFIG": AssetIn(),
     },
 )
 def combine_dicts(
@@ -309,7 +347,7 @@ def combine_dicts(
         task_name: str,
         fps: float,
         output_format: str,
-        JOB_DICT_TEMPLATE: dict,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[dict] | AssetMaterialization | Any, Any, None]:
 
     read_job_py.update({"handles": handles})
@@ -324,7 +362,7 @@ def combine_dicts(
     read_job_py.update({"output_format": output_format})
 
     get_kitsu_task_dict["yaml_submission"] = read_job_py
-    get_kitsu_task_dict["job_dict_template"] = JOB_DICT_TEMPLATE
+    get_kitsu_task_dict["job_dict_template"] = CONFIG.JOB_DICT_TEMPLATE
     get_kitsu_task_dict["task_url"] = get_task_url
     get_kitsu_task_dict["deadline_job_submitted"] = False
     get_kitsu_task_dict["deadline_job_queued"] = False
@@ -335,7 +373,8 @@ def combine_dicts(
     yield AssetMaterialization(
         asset_key="combine_dicts",
         metadata={
-            "__".join(context.asset_key.path): MetadataValue.json(get_kitsu_task_dict),
+            "__".join(context.asset_key.path): MetadataValue.json(
+                json.loads(json.dumps(get_kitsu_task_dict, indent=2, default=str))),
         }
     )
 
@@ -347,7 +386,7 @@ def combine_dicts(
         "get_kitsu_task_dict": AssetIn(),
         "show_name": AssetIn(),
         "task_name": AssetIn(),
-        "OUTPUT_ROOT": AssetIn(),
+        "CONFIG": AssetIn(),
     },
 )
 def render_version_directory(
@@ -356,7 +395,7 @@ def render_version_directory(
         get_kitsu_task_dict: dict,
         show_name: str,
         task_name: str,
-        OUTPUT_ROOT: pathlib.Path,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
 
     # TODO: make this fail safe
@@ -367,7 +406,7 @@ def render_version_directory(
 
     entity_type = f'{get_kitsu_task_dict["entity_type"]["name"]}/{entity_name}'
 
-    _out = pathlib.Path(f'{OUTPUT_ROOT}/{show_name}/{entity_type}/{task_name}/')
+    _out = pathlib.Path(f'{CONFIG.OUTPUT_ROOT}/{show_name}/{entity_type}/{task_name}/')
     _out.mkdir(parents=True, exist_ok=True)
 
     yield Output(str(_out))
@@ -463,14 +502,14 @@ def render_output_filename(
     ins={
         "combine_dicts": AssetIn(),
         "version": AssetIn(),
-        "PADDING": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def render_output_directory(
         context: AssetExecutionContext,
         combine_dicts: dict,
         version: str,
-        PADDING: int,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[Path] | AssetMaterialization | Any, Any, None]:
 
     handles = combine_dicts["yaml_submission"]["handles"]
@@ -480,7 +519,7 @@ def render_output_directory(
 
     if bool(combine_dicts["yaml_submission"]["kitsu_task"]):
         if combine_dicts["entity_type"]["name"] == 'Shot':
-            _out = _out / f'{str(handles)}_{str(combine_dicts["yaml_submission"]["frame_start"]).zfill(PADDING)}-{str(combine_dicts["yaml_submission"]["frame_end"]).zfill(PADDING)}_{str(handles)}'  # _out.joinpath(f'')
+            _out = _out / f'{str(handles)}_{str(combine_dicts["yaml_submission"]["frame_start"]).zfill(CONFIG.PADDING)}-{str(combine_dicts["yaml_submission"]["frame_end"]).zfill(CONFIG.PADDING)}_{str(handles)}'  # _out.joinpath(f'')
 
     yield Output(_out)
 
@@ -573,14 +612,14 @@ def task_name(
     ins={
         "combine_dicts": AssetIn(),
         "version": AssetIn(),
-        "PADDING": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def job_title_str(
         context: AssetExecutionContext,
         combine_dicts: dict,
         version: str,
-        PADDING: int,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
     _entity_info = combine_dicts["entity"]["name"]
 
@@ -590,7 +629,7 @@ def job_title_str(
 
     if bool(combine_dicts['yaml_submission']["kitsu_task"]):
         if combine_dicts["entity_type"]["name"] == 'Shot':
-            _entity_info = f'{_entity_info} - {str(handles)}_{str(combine_dicts["yaml_submission"]["frame_start"]).zfill(PADDING)}-{str(combine_dicts["yaml_submission"]["frame_end"]).zfill(PADDING)}_{handles}'
+            _entity_info = f'{_entity_info} - {str(handles)}_{str(combine_dicts["yaml_submission"]["frame_start"]).zfill(CONFIG.PADDING)}-{str(combine_dicts["yaml_submission"]["frame_end"]).zfill(CONFIG.PADDING)}_{handles}'
             # _entity_info = f'{self.sequence_name}_{self.entity_name} - {str(self.handles)}_{str(self.frame_start).zfill(self.PADDING)}-{str(self.frame_end).zfill(self.PADDING)}_{self.handles}'
 
     ret = f'{show_name} - {_entity_info} - {task_name} - {pathlib.Path(combine_dicts["yaml_submission"]["job_file"]).name} - {version} - {pathlib.Path(combine_dicts["yaml_submission"]["plugin_dict"]["submitter"]["executable"]).name}'
@@ -671,20 +710,20 @@ def props(
     group_name=group_name,
     ins={
         "read_job_py": AssetIn(),
-        "DEFAULT_HANDLES": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def handles(
         context: AssetExecutionContext,
         read_job_py: dict,
-        DEFAULT_HANDLES: int,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[int | Any] | AssetMaterialization | Any, Any, None]:
     """Handles with default"""
     key = "handles"
     if key in read_job_py:
         ret = read_job_py[key]
     else:
-        ret = DEFAULT_HANDLES
+        ret = CONFIG.DEFAULT_HANDLES
 
     yield Output(ret)
 
@@ -701,14 +740,14 @@ def handles(
     ins={
         "read_job_py": AssetIn(),
         "get_kitsu_task_dict": AssetIn(),
-        "DEFAULT_FPS": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def fps(
         context: AssetExecutionContext,
         read_job_py: dict,
         get_kitsu_task_dict: dict,
-        DEFAULT_FPS: float,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[float] | AssetMaterialization | Any, Any, None]:
 
     """
@@ -732,7 +771,7 @@ def fps(
             if get_kitsu_task_dict["entity"]["data"] is not None:
                 fps = float(get_kitsu_task_dict["entity"]["data"]["fps"])
     else:
-        fps = DEFAULT_FPS
+        fps = CONFIG.DEFAULT_FPS
 
     yield Output(fps)
 
@@ -777,16 +816,14 @@ def output_format(
     ins={
         "read_job_py": AssetIn(),
         "handles": AssetIn(),
-        "DEFAULT_FRAME_START": AssetIn(),
-        "DONT_ALLOW_NEGATIVE_FRAMES": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def frame_start_absolute(
         context: AssetExecutionContext,
         read_job_py: dict,
         handles: int,
-        DEFAULT_FRAME_START: int,
-        DONT_ALLOW_NEGATIVE_FRAMES: bool,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[int | Any] | AssetMaterialization | Any, Any, None]:
 
     """
@@ -795,7 +832,7 @@ def frame_start_absolute(
     nb_frames = get_kitsu_task_dict["entity"]["nb_frames"]
     """
 
-    fs = DEFAULT_FRAME_START
+    fs = CONFIG.DEFAULT_FRAME_START
 
     if "frame_start" in read_job_py:
         if bool(read_job_py["frame_start"]):
@@ -803,7 +840,7 @@ def frame_start_absolute(
 
     fsa = fs - handles
 
-    if DONT_ALLOW_NEGATIVE_FRAMES:
+    if CONFIG.DONT_ALLOW_NEGATIVE_FRAMES:
         raise Exception("Negative frames not allowed")
 
     yield Output(fsa)
@@ -822,8 +859,7 @@ def frame_start_absolute(
         "read_job_py": AssetIn(),
         "get_kitsu_task_dict": AssetIn(),
         "handles": AssetIn(),
-        "DEFAULT_FRAME_START": AssetIn(),
-        "DONT_ALLOW_NEGATIVE_FRAMES": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def frame_end_absolute(
@@ -831,12 +867,11 @@ def frame_end_absolute(
         read_job_py: dict,
         get_kitsu_task_dict: dict,
         handles: int,
-        DEFAULT_FRAME_START: int,
-        DONT_ALLOW_NEGATIVE_FRAMES: bool,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[int | Any] | AssetMaterialization | Any, Any, None]:
 
     nb_frames = get_kitsu_task_dict["entity"]["nb_frames"]
-    fe = DEFAULT_FRAME_START + (nb_frames - 1)
+    fe = CONFIG.DEFAULT_FRAME_START + (nb_frames - 1)
 
     if "frame_end" in read_job_py:
         if bool(read_job_py["frame_end"]):
@@ -844,7 +879,7 @@ def frame_end_absolute(
 
     fea = fe + handles
 
-    if DONT_ALLOW_NEGATIVE_FRAMES:
+    if CONFIG.DONT_ALLOW_NEGATIVE_FRAMES:
         raise Exception("Negative frames not allowed")
 
     # if self._frame_end is None:
@@ -869,13 +904,13 @@ def frame_end_absolute(
     group_name=group_name,
     ins={
         "combine_dicts": AssetIn(),
-        "FRAME_JUMPS": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def frames(
         context: AssetExecutionContext,
         combine_dicts: dict,
-        FRAME_JUMPS: list,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
 
     frame_start_absolute = combine_dicts["yaml_submission"]["frame_start"]
@@ -887,9 +922,9 @@ def frames(
     # frame_jumps = [i for i in constants.FRAME_JUMPS if i <= combine_dicts["yaml_submission"]["chunk_size"]]
 
     if combine_dicts["yaml_submission"]["chunk_size"] > 1:
-        frame_jumps = [min(FRAME_JUMPS)]
+        frame_jumps = [min(CONFIG.FRAME_JUMPS)]
     else:
-        frame_jumps = FRAME_JUMPS
+        frame_jumps = CONFIG.FRAME_JUMPS
 
     frame_list = ",".join([
         f"{frame_start_absolute}-{frame_end_absolute}x{int(i)}"
@@ -1057,9 +1092,7 @@ def plugin_info_file(
         "job_draft_png": AssetIn(),
         "job_draft_mov": AssetIn(),
         "job_kitsu_publish": AssetIn(),
-        "JSON_INDENT": AssetIn(),
-        "SUBMISSION_JSON": AssetIn(),
-        "JOB_DICT_TEMPLATE": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def job_submission_tree(
@@ -1071,9 +1104,7 @@ def job_submission_tree(
         job_draft_png: dict,
         job_draft_mov: dict,
         job_kitsu_publish: dict,
-        JSON_INDENT: int,
-        SUBMISSION_JSON: str,
-        JOB_DICT_TEMPLATE: dict,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[dict[str, list[str]]] | AssetMaterialization | Any, Any, None]:
 
     ####
@@ -1100,7 +1131,7 @@ def job_submission_tree(
     #
     ####
 
-    job_dict_template = JOB_DICT_TEMPLATE
+    job_dict_template = CONFIG.JOB_DICT_TEMPLATE
     job_dict_main = job_dict_template.copy()
     job_dict_main["JobInfoFilePath"] = str(job_info_file)
     job_dict_main["PluginInfoFilePath"] = str(plugin_info_file)
@@ -1167,9 +1198,9 @@ def job_submission_tree(
 
     # https://docs.thinkboxsoftware.com/products/deadline/10.2/1_User%20Manual/manual/manual-submission.html#plug-in-info-file
     render_output_directory.mkdir(parents=True, exist_ok=True)
-    submission_file = render_output_directory / SUBMISSION_JSON
+    submission_file = render_output_directory / CONFIG.SUBMISSION_JSON
     with open(submission_file, "w") as submit_v2:
-        json.dump(multiple_jobs_v2_dict, submit_v2, ensure_ascii=False, indent=JSON_INDENT, sort_keys=True)
+        json.dump(multiple_jobs_v2_dict, submit_v2, ensure_ascii=False, indent=CONFIG.JSON_INDENT, sort_keys=True)
 
     cmd = [
         "/opt/Thinkbox/Deadline10/bin/deadlinecommand",
@@ -1199,8 +1230,7 @@ def job_submission_tree(
         "job_title_str": AssetIn(),
         "resolution_draft": AssetIn(),
         "annotations_string": AssetIn(),
-        "PADDING": AssetIn(),
-        "RESOLUTION_DRAFT_SCALE": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def job_draft_png(
@@ -1212,8 +1242,7 @@ def job_draft_png(
         job_title_str: str,
         resolution_draft: tuple,
         annotations_string: str,
-        PADDING: int,
-        RESOLUTION_DRAFT_SCALE: float,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[dict[str, str]] | AssetMaterialization | Any, Any, None]:
     """
     The QuickDraft PNG Job
@@ -1246,7 +1275,7 @@ def job_draft_png(
 
     path_plugin_info = draft_out_dir/f"job_draft_{codec}_info_plugin.txt"
     with open(path_plugin_info, "w") as plugin_info_file:
-        plugin_info_file.write(f'ScriptArg0=resolution="{RESOLUTION_DRAFT_SCALE}"\n')
+        plugin_info_file.write(f'ScriptArg0=resolution="{CONFIG.RESOLUTION_DRAFT_SCALE}"\n')
         plugin_info_file.write(f'ScriptArg1=codec="{codec}"\n')
         plugin_info_file.write(f'ScriptArg2=colorSpaceIn="Identity"\n')
         plugin_info_file.write(f'ScriptArg3=colorSpaceOut="Identity"\n')
@@ -1254,7 +1283,7 @@ def job_draft_png(
         plugin_info_file.write(f'ScriptArg5=annotationsImageString="None"\n')
         plugin_info_file.write(f'ScriptArg6=annotationsResWidthString="{resolution_draft[0]}"\n')
         plugin_info_file.write(f'ScriptArg7=annotationsResHeightString="{resolution_draft[1]}"\n')
-        plugin_info_file.write(f'ScriptArg8=annotationsFramePaddingSize="{PADDING}"\n')
+        plugin_info_file.write(f'ScriptArg8=annotationsFramePaddingSize="{CONFIG.PADDING}"\n')
         plugin_info_file.write(f'ScriptArg9=quality="85"\n')
         plugin_info_file.write(f'ScriptArg10=quickType="{quick_type}"\n')
         plugin_info_file.write(f'ScriptArg11=isDistributed="False"\n')
@@ -1264,7 +1293,7 @@ def job_draft_png(
         plugin_info_file.write(f'ScriptArg15=taskStartFrame={frame_start_absolute}\n')
         plugin_info_file.write(f'ScriptArg16=taskEndFrame={frame_end_absolute}\n')
         plugin_info_file.write(f'ScriptArg17=outFolder="{draft_out_dir}"\n')
-        plugin_info_file.write('ScriptArg18=outFile="{}/{}.{}.{}"\n'.format(draft_out_dir, job_title, "#" * PADDING, codec))
+        plugin_info_file.write('ScriptArg18=outFile="{}/{}.{}.{}"\n'.format(draft_out_dir, job_title, "#" * CONFIG.PADDING, codec))
         in_file = render_output_directory / render_output_filename["padding_deadline"]
         plugin_info_file.write(f'ScriptArg19=inFile="{str(in_file)}"\n')
 
@@ -1293,8 +1322,7 @@ def job_draft_png(
         "job_title_str": AssetIn(),
         "resolution_draft": AssetIn(),
         "annotations_string": AssetIn(),
-        "PADDING": AssetIn(),
-        "RESOLUTION_DRAFT_SCALE": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def job_draft_mov(
@@ -1306,8 +1334,7 @@ def job_draft_mov(
         job_title_str: str,
         resolution_draft: tuple,
         annotations_string: str,
-        PADDING: int,
-        RESOLUTION_DRAFT_SCALE: float,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[dict[str, str]] | AssetMaterialization | Any, Any, None]:
     """
     The QuickDraft MOV Job
@@ -1343,7 +1370,7 @@ def job_draft_mov(
 
     path_plugin_info = draft_out_dir / f"job_draft_{extension}_info_plugin.txt"
     with open(path_plugin_info, "w") as plugin_info_file:
-        plugin_info_file.write(f'ScriptArg0=resolution="{RESOLUTION_DRAFT_SCALE}"\n')
+        plugin_info_file.write(f'ScriptArg0=resolution="{CONFIG.RESOLUTION_DRAFT_SCALE}"\n')
         plugin_info_file.write(f'ScriptArg1=codec="{_codec}"\n')
         plugin_info_file.write(f'ScriptArg2=colorSpaceIn="Identity"\n')
         plugin_info_file.write(f'ScriptArg3=colorSpaceOut="Identity"\n')
@@ -1351,7 +1378,7 @@ def job_draft_mov(
         plugin_info_file.write(f'ScriptArg5=annotationsImageString="None"\n')
         plugin_info_file.write(f'ScriptArg6=annotationsResWidthString="{resolution_draft[0]}"\n')
         plugin_info_file.write(f'ScriptArg7=annotationsResHeightString="{resolution_draft[1]}"\n')
-        plugin_info_file.write(f'ScriptArg8=annotationsFramePaddingSize="{PADDING}"\n')
+        plugin_info_file.write(f'ScriptArg8=annotationsFramePaddingSize="{CONFIG.PADDING}"\n')
         plugin_info_file.write(f'ScriptArg9=quality="85"\n')
         plugin_info_file.write(f'ScriptArg10=quickType="{quick_type}"\n')
         plugin_info_file.write(f'ScriptArg11=isDistributed="False"\n')
@@ -1386,18 +1413,18 @@ def job_draft_mov(
     group_name=group_name,
     ins={
         "combine_dicts": AssetIn(),
-        "RESOLUTION_DRAFT_SCALE": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def resolution_draft(
         context: AssetExecutionContext,
         combine_dicts: dict,
-        RESOLUTION_DRAFT_SCALE: float,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[tuple[float | Any, ...]] | AssetMaterialization | Any, Any, None]:
 
     resolution = combine_dicts["yaml_submission"]["resolution"]
 
-    ret = tuple(ti * RESOLUTION_DRAFT_SCALE for ti in resolution)
+    ret = tuple(ti * CONFIG.RESOLUTION_DRAFT_SCALE for ti in resolution)
 
     yield Output(ret)
 
@@ -1414,14 +1441,14 @@ def resolution_draft(
     ins={
         "get_kitsu_task_dict": AssetIn(),
         "read_job_py": AssetIn(),
-        "DEFAULT_RESOLUTION": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def resolution(
         context: AssetExecutionContext,
         get_kitsu_task_dict: dict,
         read_job_py: dict,
-        DEFAULT_RESOLUTION: tuple[int, int],
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[tuple[int, ...] | None | tuple[int, int] | Any] | AssetMaterialization | Any, Any, None]:
 
     resolution_project = get_kitsu_task_dict["project"]["resolution"]
@@ -1439,7 +1466,7 @@ def resolution(
             r = resolution_project
         w_h = tuple(int(i) for i in str(r).split("x"))
     else:
-        w_h = resolution_manual or DEFAULT_RESOLUTION
+        w_h = resolution_manual or CONFIG.DEFAULT_RESOLUTION
 
     yield Output(w_h)
 
@@ -1461,7 +1488,7 @@ def resolution(
         "version": AssetIn(),
         "batch_name": AssetIn(),
         "job_title_str": AssetIn(),
-        "GAZU_PY": AssetIn(),
+        "CONFIG": AssetIn(),
     }
 )
 def job_kitsu_publish(
@@ -1473,7 +1500,7 @@ def job_kitsu_publish(
         version: str,
         batch_name: str,
         job_title_str: str,
-        GAZU_PY: str,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[dict[str, str]] | AssetMaterialization | Any, Any, None]:
     """
     The Kitsu-Publish Job
@@ -1493,7 +1520,7 @@ def job_kitsu_publish(
     kitsu_job_out_dir = render_output_directory / "kitsu"
     kitsu_job_out_dir.mkdir(parents=True, exist_ok=True)
 
-    executable = GAZU_PY
+    executable = CONFIG.GAZU_PY
     args = []
     args.extend(['<QUOTE>/data/share/deadline-repository/DeadlineRepository10/custom/events/Kitsu/kitsu_submission_cli.py<QUOTE>'])
     args.extend(['--task-id', '<QUOTE>{}<QUOTE>'.format(combine_dicts["yaml_submission"]["kitsu_task"])])
@@ -1556,7 +1583,7 @@ def job_kitsu_publish(
         "render_output_directory": AssetIn(),
         "combine_dicts": AssetIn(),
         "job_submission_tree": AssetIn(),
-        "JSON_INDENT": AssetIn(),
+        "CONFIG": AssetIn(),
     },
 )
 def export_combined_dict(
@@ -1564,7 +1591,7 @@ def export_combined_dict(
         render_output_directory: pathlib.Path,
         combine_dicts: dict,
         job_submission_tree: dict,
-        JSON_INDENT: int,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[Path] | AssetMaterialization | Any, Any, None]:
 
     combine_dicts["deadline_cmd"] = job_submission_tree
@@ -1572,7 +1599,7 @@ def export_combined_dict(
     out = render_output_directory / "combined_dict.json"
 
     with open(out, "w") as fo:
-        json.dump(combine_dicts, fo, indent=JSON_INDENT, sort_keys=True)
+        json.dump(combine_dicts, fo, indent=CONFIG.JSON_INDENT, sort_keys=True)
 
     yield Output(out)
 

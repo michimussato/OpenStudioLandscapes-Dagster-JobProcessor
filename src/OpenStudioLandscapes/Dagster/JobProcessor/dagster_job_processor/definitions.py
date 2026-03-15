@@ -7,7 +7,7 @@ from dagster import (
     AutoMaterializeRule,
 )
 
-from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.assets import read_yaml, submit_jobs, constants_factory
+from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.assets import read_yaml, submit_jobs
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.resources import (
     KitsuResource,
 )
@@ -43,7 +43,10 @@ deployment_name = os.environ.get("DAGSTER_DEPLOYMENT", "farm")
 
 
 defs = Definitions(
-    assets=[*read_yaml_assets, *submit_jobs_assets, *constants_factory.assets],
+    assets=[
+        *read_yaml_assets,
+        *submit_jobs_assets,
+    ],
     resources=resources[deployment_name],
     sensors=all_sensors,
 )
