@@ -11,7 +11,7 @@ import yaml
 from dagster import (
     asset, AssetIn, MetadataValue,
     AssetMaterialization, Output,
-    Config, AssetExecutionContext,
+    Config, AssetExecutionContext, AssetKey,
 )
 import json
 
@@ -229,7 +229,9 @@ def get_task_url(
     ins={
         "combine_dicts": AssetIn(),
         "version": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     },
 )
 def annotations_string(
@@ -329,7 +331,9 @@ def annotations_string(
         "task_name": AssetIn(),
         "fps": AssetIn(),
         "output_format": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     },
 )
 def combine_dicts(
@@ -386,7 +390,9 @@ def combine_dicts(
         "get_kitsu_task_dict": AssetIn(),
         "show_name": AssetIn(),
         "task_name": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     },
 )
 def render_version_directory(
@@ -502,7 +508,9 @@ def render_output_filename(
     ins={
         "combine_dicts": AssetIn(),
         "version": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def render_output_directory(
@@ -612,7 +620,9 @@ def task_name(
     ins={
         "combine_dicts": AssetIn(),
         "version": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def job_title_str(
@@ -740,7 +750,9 @@ def handles(
     ins={
         "read_job_py": AssetIn(),
         "get_kitsu_task_dict": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def fps(
@@ -816,7 +828,9 @@ def output_format(
     ins={
         "read_job_py": AssetIn(),
         "handles": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def frame_start_absolute(
@@ -859,7 +873,9 @@ def frame_start_absolute(
         "read_job_py": AssetIn(),
         "get_kitsu_task_dict": AssetIn(),
         "handles": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def frame_end_absolute(
@@ -904,7 +920,9 @@ def frame_end_absolute(
     group_name=group_name,
     ins={
         "combine_dicts": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def frames(
@@ -1092,7 +1110,9 @@ def plugin_info_file(
         "job_draft_png": AssetIn(),
         "job_draft_mov": AssetIn(),
         "job_kitsu_publish": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def job_submission_tree(
@@ -1230,7 +1250,9 @@ def job_submission_tree(
         "job_title_str": AssetIn(),
         "resolution_draft": AssetIn(),
         "annotations_string": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def job_draft_png(
@@ -1322,7 +1344,9 @@ def job_draft_png(
         "job_title_str": AssetIn(),
         "resolution_draft": AssetIn(),
         "annotations_string": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def job_draft_mov(
@@ -1413,7 +1437,9 @@ def job_draft_mov(
     group_name=group_name,
     ins={
         "combine_dicts": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def resolution_draft(
@@ -1441,7 +1467,9 @@ def resolution_draft(
     ins={
         "get_kitsu_task_dict": AssetIn(),
         "read_job_py": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def resolution(
@@ -1488,7 +1516,9 @@ def resolution(
         "version": AssetIn(),
         "batch_name": AssetIn(),
         "job_title_str": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     }
 )
 def job_kitsu_publish(
@@ -1583,7 +1613,9 @@ def job_kitsu_publish(
         "render_output_directory": AssetIn(),
         "combine_dicts": AssetIn(),
         "job_submission_tree": AssetIn(),
-        "CONFIG": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+        ),
     },
 )
 def export_combined_dict(
