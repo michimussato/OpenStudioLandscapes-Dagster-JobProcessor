@@ -1,6 +1,5 @@
 # import os
 # import pathlib
-from typing import Any, Generator
 
 from dagster import (
     asset,
@@ -125,7 +124,7 @@ def asset_factory(spec) -> AssetsDefinition:
         group_name=GROUP_NAME,
         name=spec["name"],
     )
-    def _asset() -> Generator[Output[Any] | AssetMaterialization | Any, Any, None]:
+    def _asset() -> dict:
 
         yield Output(spec["value"])
 
