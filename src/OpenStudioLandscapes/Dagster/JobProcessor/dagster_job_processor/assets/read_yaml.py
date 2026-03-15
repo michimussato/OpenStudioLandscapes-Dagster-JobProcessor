@@ -365,9 +365,9 @@ def render_version_directory(
     else:
         entity_name = "No Entity Name"
 
-    entity_type = f"{get_kitsu_task_dict['entity_type']['name']}/{entity_name}"
+    entity_type = f'{get_kitsu_task_dict["entity_type"]["name"]}/{entity_name}'
 
-    _out = pathlib.Path(f"{OUTPUT_ROOT}/{show_name}/{entity_type}/{task_name}/")
+    _out = pathlib.Path(f'{OUTPUT_ROOT}/{show_name}/{entity_type}/{task_name}/')
     _out.mkdir(parents=True, exist_ok=True)
 
     yield Output(str(_out))
@@ -479,8 +479,8 @@ def render_output_directory(
     _out = render_version_directory / version
 
     if bool(combine_dicts["yaml_submission"]["kitsu_task"]):
-        if combine_dicts["entity_type"]["name"] == "Shot":
-            _out = _out / f"{str(handles)}_{str(combine_dicts['yaml_submission']['frame_start']).zfill(PADDING)}-{str(combine_dicts['yaml_submission']['frame_end']).zfill(PADDING)}_{str(handles)}"  # _out.joinpath(f'')
+        if combine_dicts["entity_type"]["name"] == 'Shot':
+            _out = _out / f'{str(handles)}_{str(combine_dicts["yaml_submission"]["frame_start"]).zfill(PADDING)}-{str(combine_dicts["yaml_submission"]["frame_end"]).zfill(PADDING)}_{str(handles)}'  # _out.joinpath(f'')
 
     yield Output(_out)
 
@@ -588,12 +588,12 @@ def job_title_str(
     show_name = combine_dicts["yaml_submission"]["show_name"]
     task_name = combine_dicts["yaml_submission"]["task_name"]
 
-    if bool(combine_dicts["yaml_submission"]["kitsu_task"]):
-        if combine_dicts["entity_type"]["name"] == "Shot":
-            _entity_info = f"{_entity_info} - {str(handles)}_{str(combine_dicts['yaml_submission']['frame_start']).zfill(PADDING)}-{str(combine_dicts['yaml_submission']['frame_end']).zfill(PADDING)}_{handles}"
-            # _entity_info = f"{self.sequence_name}_{self.entity_name} - {str(self.handles)}_{str(self.frame_start).zfill(self.PADDING)}-{str(self.frame_end).zfill(self.PADDING)}_{self.handles}"
+    if bool(combine_dicts['yaml_submission']["kitsu_task"]):
+        if combine_dicts["entity_type"]["name"] == 'Shot':
+            _entity_info = f'{_entity_info} - {str(handles)}_{str(combine_dicts["yaml_submission"]["frame_start"]).zfill(PADDING)}-{str(combine_dicts["yaml_submission"]["frame_end"]).zfill(PADDING)}_{handles}'
+            # _entity_info = f'{self.sequence_name}_{self.entity_name} - {str(self.handles)}_{str(self.frame_start).zfill(self.PADDING)}-{str(self.frame_end).zfill(self.PADDING)}_{self.handles}'
 
-    ret = f"{show_name} - {_entity_info} - {task_name} - {pathlib.Path(combine_dicts['yaml_submission']['job_file']).name} - {version} - {pathlib.Path(combine_dicts['yaml_submission']['plugin_dict']['submitter']['executable']).name}"
+    ret = f'{show_name} - {_entity_info} - {task_name} - {pathlib.Path(combine_dicts["yaml_submission"]["job_file"]).name} - {version} - {pathlib.Path(combine_dicts["yaml_submission"]["plugin_dict"]["submitter"]["executable"]).name}'
 
     yield Output(ret)
 
@@ -646,16 +646,16 @@ def props(
 ) -> Generator[Output[list[str]] | AssetMaterialization | Any, Any, None]:
 
     props = [
-        ("Comment", f"{combine_dicts['yaml_submission']['comment']}"),  # TODO
-        ("ForceReloadPlugin", True),
-        ("InitialStatus", combine_dicts['yaml_submission']['deadline_initial_status']),
-        ("OutputDirectory0", f"{render_output_directory}"),
-        ("OutputFilename0", f"{render_output_filename['padding_deadline']}"),
-        ("BatchName", f"{batch_name}"),
+        ('Comment', f'{combine_dicts["yaml_submission"]["comment"]}'),  # TODO
+        ('ForceReloadPlugin', True),
+        ('InitialStatus', combine_dicts["yaml_submission"]["deadline_initial_status"]),
+        ('OutputDirectory0', f'{render_output_directory}'),
+        ('OutputFilename0', f'{render_output_filename["padding_deadline"]}'),
+        ('BatchName', f'{batch_name}'),
         # This should not end up in plugin_info_file it seems: https://docs.thinkboxsoftware.com/products/deadline/10.1/1_User%20Manual/manual/manual-submission.html#job-info-ref-label
     ]
 
-    props_ = [f"{k}={v}" for k, v in props]
+    props_ = [f'{k}={v}' for k, v in props]
 
     yield Output(props_)
 
@@ -939,7 +939,7 @@ def job_info_file(
         job_info_file.write(f'Plugin=CommandLine\n')
         job_info_file.write(f'StartupDirectory=\n')
         for prop in props:
-            job_info_file.write(f"{prop}\n")
+            job_info_file.write(f'{prop}\n')
 
     yield Output(path)
 
@@ -1034,8 +1034,8 @@ def plugin_info_file(
     render_output_directory.mkdir(parents=True, exist_ok=True)
     path = pathlib.Path(f"{render_output_directory}/plugin_info.txt")
     with open(path, "w") as job_info_file:
-        job_info_file.write(f"Executable={combine_dicts['yaml_submission']['plugin_dict']['submitter']['executable']}\n")
-        job_info_file.write(f"Arguments='{render_arguments}'\n")
+        job_info_file.write(f'Executable={combine_dicts["yaml_submission"]["plugin_dict"]["submitter"]["executable"]}\n')
+        job_info_file.write(f'Arguments="{render_arguments}"\n')
 
     yield Output(path)
 
@@ -1531,7 +1531,7 @@ def job_kitsu_publish(
 
     path_plugin_info = kitsu_job_out_dir / "job_draft_kitsu_publish_info_plugin.txt"
     with open(path_plugin_info, "w") as plugin_info_file:
-        plugin_info_file.write(f"Executable={executable}\n")
+        plugin_info_file.write(f'Executable={executable}\n')
         plugin_info_file.write(f'Arguments={" ".join(args)}\n')
 
     ret = {
