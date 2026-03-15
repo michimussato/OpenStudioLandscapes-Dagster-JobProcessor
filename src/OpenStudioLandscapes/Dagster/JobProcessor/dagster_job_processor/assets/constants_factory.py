@@ -1,5 +1,6 @@
 # import os
 # import pathlib
+from typing import Any, Generator
 
 from dagster import (
     asset,
@@ -102,7 +103,7 @@ assets = [
         # Todo
         #  text -> pathlib.Path
         "name": "GAZU_PY",
-        "value": "/opt/gazu/gazuenv/bin/python3.9",
+        "value": "/opt/python3.11/bin/python3.11",
         "type": MetadataValue.text,
     },
     {
@@ -124,7 +125,7 @@ def asset_factory(spec) -> AssetsDefinition:
         group_name=GROUP_NAME,
         name=spec["name"],
     )
-    def _asset() -> dict:
+    def _asset() -> Generator[Output[Any] | AssetMaterialization | Any, Any, None]:
 
         yield Output(spec["value"])
 
