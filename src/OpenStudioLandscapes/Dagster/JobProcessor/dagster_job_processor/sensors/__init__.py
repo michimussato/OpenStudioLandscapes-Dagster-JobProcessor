@@ -15,8 +15,12 @@ import pathlib
 import shutil
 
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor import settings
+from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.config.models import DefaultConstants
 
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.jobs import submit_synced_jobs, ingest_synced_jobs
+
+
+CONFIG: DefaultConstants = DefaultConstants()
 
 
 @sensor(
@@ -27,14 +31,14 @@ from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.jobs import
 def submission_sensor(
         context: SensorEvaluationContext,
 ):
-    path_to_submission_files = pathlib.Path(settings.OUTPUT_ROOT)
+    path_to_submission_files = pathlib.Path(CONFIG.OUTPUT_ROOT)
 
     previous_state = json.loads(context.cursor) if context.cursor else {}
     current_state = {}
 
     runs_to_request = []
 
-    for submission_json in path_to_submission_files.rglob(settings.SUBMISSION_JSON):
+    for submission_json in path_to_submission_files.rglob(CONFIG.SUBMISSION_JSON):
 
         file_path = path_to_submission_files / submission_json
 
@@ -107,7 +111,7 @@ def submission_sensor(
 def ingestion_sensor(
         context: SensorEvaluationContext,
 ):
-    path_to_submission_files = pathlib.Path(settings.INPUT_ROOT)
+    path_to_submission_files = pathlib.Path(CONFIG.INPUT_ROOT)
 
     runs_to_request = []
 
@@ -119,8 +123,8 @@ def ingestion_sensor(
 
         context.log.info(f'Submission file is new: {job_py}...')
 
-        settings.INPUT_ROOT_PROCESSED.mkdir(mode=0o777, exist_ok=True, parents=True)
-        output_file = settings.INPUT_ROOT_PROCESSED / f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S_%f")}_{job_py.name}'
+        CONFIG.INPUT_ROOT_PROCESSED.mkdir(mode=0o777, exist_ok=True, parents=True)
+        output_file = CONFIG.INPUT_ROOT_PROCESSED / f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S_%f")}_{job_py.name}'
         # shutil.move(job_py, output_file)
 
         context.log.info(f'{output_file = }...')
