@@ -57,7 +57,7 @@ def submit_job(
     except Exception as err:
         context.log.error(err)
         combine_dicts["deadline_job_submitted"] = False
-        combine_dicts["deadline_job_submitted_result"] = err
+        combine_dicts["deadline_job_submitted_result"] = str(err)
 
     return MaterializeResult(
         asset_key="submit_job",
