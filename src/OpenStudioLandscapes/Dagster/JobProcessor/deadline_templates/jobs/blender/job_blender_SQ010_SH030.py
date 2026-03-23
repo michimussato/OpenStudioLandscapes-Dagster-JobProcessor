@@ -1,7 +1,8 @@
 import pathlib
 
 from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins import *
-from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.jobs.job_base import job
+from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.jobs.job_base import job, INITIAL_STATUSES, InitialStatuses
+# from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.jobs.job_base import job, INITIAL_STATUSES
 from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.blender.plugin_blender__4_1_1 import plugin
 
 # Production:
@@ -11,6 +12,8 @@ from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.blende
 
 job["job_file"] = pathlib.Path(TEST_FIXTURES / "blender" / "sh030_001.blend").as_posix()
 job["plugin_dict"] = plugin
+job["deadline_initial_status"] = str(InitialStatuses.SUSPENDED)
+# job["deadline_initial_status"] = INITIAL_STATUSES[INITIAL_STATUSES.index("Active")]
 job["kitsu_task"] = "b0cfdac7-afa9-4382-a75d-3c80a388e136"  # SQ010 / SQ010_SH030  Rendering  https://kitsu.pangolin.openstudiolandscapes.cloud-ip.cc/productions/3ede4117-b73c-4bd3-83a2-40d66bc954c5/shots/tasks/b0cfdac7-afa9-4382-a75d-3c80a388e136
 job["append_draft_job_png"] = True
 job["append_draft_job_mov"] = True

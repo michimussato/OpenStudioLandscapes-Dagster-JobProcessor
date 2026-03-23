@@ -1,10 +1,13 @@
 import datetime
 import uuid
+import enum
 
-INITIAL_STATUSES: list[str] = [
-    "Active",
-    "Suspended",
-]
+class InitialStatuses(enum.StrEnum):
+    ACTIVE = "Active"
+    SUSPENDED = "Suspended"
+
+INITIAL_STATUSES: list[str] = [str(i.value) for i in InitialStatuses]
+
 OUTPUT_FORMATS: list[str] = [
     "png",
     "exr",
@@ -23,7 +26,7 @@ job: dict = {
     "output_format": OUTPUT_FORMATS[OUTPUT_FORMATS.index("exr")],
     "chunk_size": 1,
     "initial_statuses": INITIAL_STATUSES,
-    "deadline_initial_status": INITIAL_STATUSES[INITIAL_STATUSES.index("Suspended")],
+    "deadline_initial_status": str(InitialStatuses.SUSPENDED),
     "append_draft_job_png": False,
     "append_draft_job_mov": False,
     "with_kitsu_publish": False,
