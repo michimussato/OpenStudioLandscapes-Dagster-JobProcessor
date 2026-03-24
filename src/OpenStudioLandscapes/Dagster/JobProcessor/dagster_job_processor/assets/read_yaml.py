@@ -131,7 +131,7 @@ def read_job_py(
     yield Output(job)
 
     yield AssetMaterialization(
-        asset_key="read_job_py",
+        asset_key=context.asset_key,
         metadata={
             # "__".join(context.asset_key.path): MetadataValue.json(job),
             "__".join(context.asset_key.path): MetadataValue.json(json.loads(json.dumps(job, indent=2, default=str))),
@@ -225,7 +225,7 @@ def get_kitsu_task_dict(
     yield Output(task_dict)
 
     yield AssetMaterialization(
-        asset_key="get_kitsu_task_dict",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(task_dict),
         }
@@ -256,7 +256,7 @@ def get_task_url(
     yield Output(task_url)
 
     yield AssetMaterialization(
-        asset_key="get_task_url",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.url(task_url),
         }
@@ -346,7 +346,7 @@ def annotations_string(
     yield Output(json.dumps(draft_annotations_string))
 
     yield AssetMaterialization(
-        asset_key="annotations_string",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(draft_annotations_string),
             "annotations_string": MetadataValue.text(json.dumps(draft_annotations_string))
@@ -414,7 +414,7 @@ def combine_dicts(
     yield Output(get_kitsu_task_dict)
 
     yield AssetMaterialization(
-        asset_key="combine_dicts",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(
                 json.loads(json.dumps(get_kitsu_task_dict, indent=2, default=str))),
@@ -457,7 +457,7 @@ def render_version_directory(
     yield Output(str(_out))
 
     yield AssetMaterialization(
-        asset_key="render_version_directory",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(_out),
         }
@@ -493,7 +493,7 @@ def version(
     yield Output(new_version)
 
     yield AssetMaterialization(
-        asset_key="version",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.text(new_version),
             "dirs": MetadataValue.json(dirs),
@@ -540,7 +540,7 @@ def render_output_filename(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="render_output_filename",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(ret),
         }
@@ -576,7 +576,7 @@ def render_output_directory(
     yield Output(_out)
 
     yield AssetMaterialization(
-        asset_key="render_output_directory",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(_out)
         }
@@ -598,7 +598,7 @@ def job_title(
     yield Output(base)
 
     yield AssetMaterialization(
-        asset_key="job_title",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.text(base)
         }
@@ -625,7 +625,7 @@ def show_name(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="show_name",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.text(ret)
         }
@@ -652,7 +652,7 @@ def task_name(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="task_name",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.text(ret)
         }
@@ -691,7 +691,7 @@ def job_title_str(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="job_title_str",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.text(ret)
         }
@@ -714,7 +714,7 @@ def batch_name(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="batch_name",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.text(ret)
         }
@@ -753,7 +753,7 @@ def props(
     yield Output(props_)
 
     yield AssetMaterialization(
-        asset_key="props",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(props_)
         }
@@ -784,7 +784,7 @@ def handles(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key=key,
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.int(ret)
         }
@@ -834,7 +834,7 @@ def fps(
     yield Output(fps)
 
     yield AssetMaterialization(
-        asset_key="fps",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.float(fps)
         }
@@ -862,7 +862,7 @@ def output_format(
     yield Output(read_job_py["output_format"])
 
     yield AssetMaterialization(
-        asset_key="output_format",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.text(read_job_py["output_format"])
         }
@@ -906,7 +906,7 @@ def frame_start_absolute(
     yield Output(fsa)
 
     yield AssetMaterialization(
-        asset_key="frame_start_absolute",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.int(fsa)
         }
@@ -955,7 +955,7 @@ def frame_end_absolute(
     yield Output(fea)
 
     yield AssetMaterialization(
-        asset_key="frame_end_absolute",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.int(fea)
         }
@@ -998,7 +998,7 @@ def frames(
     yield Output(frame_list)
 
     yield AssetMaterialization(
-        asset_key="frames",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.text(frame_list)
         }
@@ -1043,7 +1043,7 @@ def job_info_file(
     yield Output(path)
 
     yield AssetMaterialization(
-        asset_key="job_info_file",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(path)
         }
@@ -1073,7 +1073,7 @@ def paste_job_py(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="paste_job_py",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(ret)
         }
@@ -1107,7 +1107,7 @@ def render_arguments(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="render_arguments",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.text(ret)
         }
@@ -1139,7 +1139,7 @@ def plugin_info_file(
     yield Output(path)
 
     yield AssetMaterialization(
-        asset_key="plugin_info_file",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(path)
         }
@@ -1279,7 +1279,7 @@ def job_submission_tree(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="job_submission_tree",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(ret)
         }
@@ -1373,7 +1373,7 @@ def job_draft_png(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="job_draft_png",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(ret)
         }
@@ -1472,7 +1472,7 @@ def job_draft_mov(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="job_draft_mov",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(ret)
         }
@@ -1501,7 +1501,7 @@ def resolution_draft(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="resolution_draft",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(ret)
         }
@@ -1545,7 +1545,7 @@ def resolution(
     yield Output(w_h)
 
     yield AssetMaterialization(
-        asset_key="resolution",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(w_h)
         }
@@ -1647,7 +1647,7 @@ def job_kitsu_publish(
     yield Output(ret)
 
     yield AssetMaterialization(
-        asset_key="job_kitsu_publish",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(ret)
         }
@@ -1684,7 +1684,7 @@ def export_combined_dict(
     yield Output(out)
 
     yield AssetMaterialization(
-        asset_key="export_combined_dict",
+        asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(out),
             "destination": MetadataValue.path(out.parent),

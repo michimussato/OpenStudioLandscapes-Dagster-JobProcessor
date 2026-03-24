@@ -55,5 +55,17 @@ job['render_engine'] = 'CYCLES'
 job['comment'] = 'This is Bender job comment'
 job['frame_start'] = 1201
 job['frame_end'] = 1250
+```
 
+## Development/Debugging in Docker Container (OpenStudioLandscapes)
+
+> [!NOTE]
+> 
+> This operation is non-persistent and changes are
+> reverted after container restart.
+
+Force reinstall updated package without re-deployment:
+
+```shell
+python3.11 -m pip install --root-user-action=ignore --force-reinstall 'OpenStudioLandscapes-Dagster-JobProcessor @ git+https://github.com/michimussato/OpenStudioLandscapes-Dagster-JobProcessor.git@main'
 ```

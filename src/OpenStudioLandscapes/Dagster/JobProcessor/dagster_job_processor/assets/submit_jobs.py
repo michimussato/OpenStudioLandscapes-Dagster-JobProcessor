@@ -86,7 +86,7 @@ def submit_job(
         combine_dicts["deadline_job_submitted_result"] = str(err)
 
     return MaterializeResult(
-        asset_key="submit_job",
+        asset_key=context.asset_key,
         metadata={
             "url": MetadataValue.url(combine_dicts["task_url"]),
             "job_submitted": MetadataValue.bool(combine_dicts["deadline_job_submitted"]),
