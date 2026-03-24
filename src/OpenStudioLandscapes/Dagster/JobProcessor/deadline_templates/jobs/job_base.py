@@ -6,27 +6,24 @@ class InitialStatuses(enum.StrEnum):
     ACTIVE = "Active"
     SUSPENDED = "Suspended"
 
-INITIAL_STATUSES: list[str] = [str(i.value) for i in InitialStatuses]
-
-OUTPUT_FORMATS: list[str] = [
-    "png",
-    "exr",
-    "jpg",
-    "tga",
-]
+class OutputFormats(enum.StrEnum):
+    PNG = "png"
+    EXR = "exr"
+    JPG = "jpg"
+    TGA = "tga"
 
 job: dict = {
     "job_file": None,
     "plugin_dict": {},
     "plugin_file": None,
-    "job_uuid": f"{uuid.uuid4()}",
-    "job_timestamp": f"{datetime.datetime.timestamp(datetime.datetime.now())}",
+    "job_uuid": str(uuid.uuid4()),
+    "job_timestamp": str(datetime.datetime.timestamp(datetime.datetime.now())),
     "handles": 4,
-    "output_formats": OUTPUT_FORMATS,
-    "output_format": OUTPUT_FORMATS[OUTPUT_FORMATS.index("exr")],
+    "output_formats": [str(i.value) for i in OutputFormats],
+    "output_format": OutputFormats.EXR.value,
     "chunk_size": 1,
-    "initial_statuses": INITIAL_STATUSES,
-    "deadline_initial_status": str(InitialStatuses.SUSPENDED),
+    "initial_statuses": [str(i.value) for i in InitialStatuses],
+    "deadline_initial_status": InitialStatuses.SUSPENDED.value,
     "append_draft_job_png": False,
     "append_draft_job_mov": False,
     "with_kitsu_publish": False,
