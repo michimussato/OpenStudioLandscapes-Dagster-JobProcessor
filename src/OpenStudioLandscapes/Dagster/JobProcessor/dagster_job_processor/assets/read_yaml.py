@@ -29,18 +29,18 @@ group_name = "DEADLINE_GENERATE_JOB_SCRIPTS"
 test_jobs = ["blender", "houdini", "nuke"][0]
 
 
-GROUP_CONSTANTS_DEFAULT = "OpenStudioLandscapes_Dagster_JobProcessor"
+GROUP_JOB_PROCESSOR = "OpenStudioLandscapes_Dagster_JobProcessor"
 # KEY_CONSTANTS_DEFAULT = [GROUP_CONSTANTS_DEFAULT, "Constants"]
-KEY_CONSTANTS_DEFAULT = [GROUP_CONSTANTS_DEFAULT]
+KEY_JOB_PROCESSOR = [GROUP_JOB_PROCESSOR]
 
-ASSET_HEADER_CONSTANTS_DEFAULT = {
-    "group_name": GROUP_CONSTANTS_DEFAULT,
-    "key_prefix": KEY_CONSTANTS_DEFAULT,
+ASSET_HEADER_JOB_PROCESSOR = {
+    "group_name": GROUP_JOB_PROCESSOR,
+    "key_prefix": KEY_JOB_PROCESSOR,
 }
 
 
 @asset(
-    **ASSET_HEADER_CONSTANTS_DEFAULT,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={},
 )
 def CONFIG(
@@ -72,7 +72,7 @@ class IngestJobConfig(Config):
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     description="Parses the job file.",
 )
 def read_job_py(
@@ -167,7 +167,7 @@ def read_job_py(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn()
     },
@@ -195,7 +195,7 @@ def get_kitsu_task_dict(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={"get_kitsu_task_dict": AssetIn()},
 )
 def get_task_url(
@@ -226,12 +226,12 @@ def get_task_url(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "version": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     },
 )
@@ -317,7 +317,7 @@ def annotations_string(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn(),
         "get_kitsu_task_dict": AssetIn(),
@@ -333,7 +333,7 @@ def annotations_string(
         "fps": AssetIn(),
         "output_format": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     },
 )
@@ -385,14 +385,14 @@ def combine_dicts(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn(),
         "get_kitsu_task_dict": AssetIn(),
         "show_name": AssetIn(),
         "task_name": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     },
 )
@@ -427,7 +427,7 @@ def render_version_directory(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
     },
@@ -464,11 +464,11 @@ def version(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     },
 )
@@ -510,12 +510,12 @@ def render_output_filename(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "version": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -546,7 +546,7 @@ def render_output_directory(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn(),
     }
@@ -568,7 +568,7 @@ def job_title(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn(),
         "get_kitsu_task_dict": AssetIn(),
@@ -595,7 +595,7 @@ def show_name(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn(),
         "get_kitsu_task_dict": AssetIn(),
@@ -622,12 +622,12 @@ def task_name(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "version": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -661,7 +661,7 @@ def job_title_str(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "job_title_str": AssetIn(),
     }
@@ -684,7 +684,7 @@ def batch_name(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "render_output_directory": AssetIn(),
@@ -723,11 +723,11 @@ def props(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -754,12 +754,12 @@ def handles(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn(),
         "get_kitsu_task_dict": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -804,7 +804,7 @@ def fps(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn(),
     },
@@ -832,12 +832,12 @@ def output_format(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn(),
         "handles": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -876,13 +876,13 @@ def frame_start_absolute(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "read_job_py": AssetIn(),
         "get_kitsu_task_dict": AssetIn(),
         "handles": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -925,11 +925,11 @@ def frame_end_absolute(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -968,7 +968,7 @@ def frames(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "batch_name": AssetIn(),
@@ -1013,7 +1013,7 @@ def job_info_file(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     deps=["job_submission_tree"],
     ins={
         "render_output_directory": AssetIn(),
@@ -1043,7 +1043,7 @@ def paste_job_py(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "render_output_directory": AssetIn(),
@@ -1077,7 +1077,7 @@ def render_arguments(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "render_output_directory": AssetIn(),
         "combine_dicts": AssetIn(),
@@ -1109,7 +1109,7 @@ def plugin_info_file(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "render_output_directory": AssetIn(),
@@ -1119,7 +1119,7 @@ def plugin_info_file(
         "job_draft_mov": AssetIn(),
         "job_kitsu_publish": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -1249,7 +1249,7 @@ def job_submission_tree(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "render_output_directory": AssetIn(),
@@ -1259,7 +1259,7 @@ def job_submission_tree(
         "resolution_draft": AssetIn(),
         "annotations_string": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -1301,7 +1301,7 @@ def job_draft_png(
         job_info_file.write(f'Plugin=DraftPlugin\n')
         job_info_file.write(f'OutputDirectory0={draft_out_dir}\n')
         job_info_file.write(f'OutputFilename0={render_output_filename["padding_deadline"]}\n')
-        job_info_file.write(f'InitialStatus=Suspended\n')
+        job_info_file.write(f'InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}\n')
 
     path_plugin_info = draft_out_dir/f"job_draft_{codec}_info_plugin.txt"
     with open(path_plugin_info, "w") as plugin_info_file:
@@ -1343,7 +1343,7 @@ def job_draft_png(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "render_output_directory": AssetIn(),
@@ -1353,7 +1353,7 @@ def job_draft_png(
         "resolution_draft": AssetIn(),
         "annotations_string": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -1398,7 +1398,7 @@ def job_draft_mov(
         job_info_file.write(f'Plugin=DraftPlugin\n')
         job_info_file.write(f'OutputDirectory0={draft_out_dir}\n')
         job_info_file.write(f'OutputFilename0={render_output_filename["padding_deadline"]}\n')
-        job_info_file.write(f'InitialStatus=Suspended\n')
+        job_info_file.write(f'InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}\n')
 
     path_plugin_info = draft_out_dir / f"job_draft_{extension}_info_plugin.txt"
     with open(path_plugin_info, "w") as plugin_info_file:
@@ -1442,11 +1442,11 @@ def job_draft_mov(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -1471,12 +1471,12 @@ def resolution_draft(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "get_kitsu_task_dict": AssetIn(),
         "read_job_py": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -1515,7 +1515,7 @@ def resolution(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
         "render_arguments": AssetIn(),
@@ -1525,7 +1525,7 @@ def resolution(
         "batch_name": AssetIn(),
         "job_title_str": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     }
 )
@@ -1592,7 +1592,7 @@ def job_kitsu_publish(
         job_info_file.write(f'ChunkSize=1000000\n')
         job_info_file.write(f'OutputDirectory0={draft_out_dir}\n')
         job_info_file.write(f'OutputFilename0={render_output_filename["padding_deadline"]}\n')
-        job_info_file.write(f'InitialStatus=Suspended\n')
+        job_info_file.write(f'InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}\n')
         job_info_file.write(f'Plugin=CommandLine\n')
         job_info_file.write(f'ForceReloadPlugin=True\n')
 
@@ -1617,14 +1617,14 @@ def job_kitsu_publish(
 
 
 @asset(
-    group_name=group_name,
+    **ASSET_HEADER_JOB_PROCESSOR,
     deps=["paste_job_py"],
     ins={
         "render_output_directory": AssetIn(),
         "combine_dicts": AssetIn(),
         "job_submission_tree": AssetIn(),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_CONSTANTS_DEFAULT["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
     },
 )

@@ -2,9 +2,18 @@ import json
 import shlex
 import subprocess
 
-from dagster import asset, Config, MaterializeResult, MetadataValue, AssetExecutionContext
+from dagster import (
+    AssetIn,
+    asset,
+    Config,
+    MaterializeResult,
+    MetadataValue,
+    AssetExecutionContext,
+    AssetKey,
+)
 
-from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor import settings
+from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.config.models import DefaultConstants
+from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.assets.read_yaml import ASSET_HEADER_JOB_PROCESSOR
 
 
 class SubmitJobConfig(Config):
@@ -14,11 +23,19 @@ class SubmitJobConfig(Config):
 
 @asset(
     group_name="DEADLINE_SUBMIT_JOB",
-    deps=["export_combined_dict"]
+    ins={
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
+        ),
+    },
+    deps=[
+        AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "export_combined_dict"])
+    ]
 )
 def submit_job(
         context: AssetExecutionContext,
         config: SubmitJobConfig,
+        CONFIG: DefaultConstants,
 ) -> MaterializeResult:
 
     with open(config.combine_dict_path, "r") as combine_dict_file:
@@ -49,7 +66,7 @@ def submit_job(
                 obj=combine_dicts,
                 fp=combine_dict_file,
                 ensure_ascii=False,
-                indent=settings.JSON_INDENT,
+                indent=CONFIG.JSON_INDENT,
                 sort_keys=True,
             )
             # combine_dict_file.truncate()
