@@ -4,6 +4,7 @@ import importlib.util
 import os
 import shutil
 import sys
+import textwrap
 from pathlib import Path
 from typing import Any, Generator
 
@@ -18,44 +19,6 @@ import json
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.config.models import DefaultConstants
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.resources import KitsuResource
 
-"""
-dagster._core.errors.DagsterInvalidSubsetError: AssetKey(s) ['read_job_py'] were selected, but no AssetsDefinition objects supply these keys. Make sure all keys are spelled correctly, and all AssetsDefinitions are correctly added to the `Definitions`.
-
-For selected asset ["read_job_py"], did you mean one of the following?
-	["OpenStudioLandscapes_Dagster_JobProcessor", "read_job_py"]
-
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_grpc/server.py", line 417, in __init__
-    self._loaded_repositories: Optional[LoadedRepositories] = LoadedRepositories(
-                                                              ^^^^^^^^^^^^^^^^^^^
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_grpc/server.py", line 275, in __init__
-    repo_def.load_all_definitions()
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/definitions/repository_definition/repository_definition.py", line 178, in load_all_definitions
-    self._repository_data.load_all_definitions()
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/definitions/repository_definition/repository_data.py", line 201, in load_all_definitions
-    self.get_all_jobs()
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/definitions/repository_definition/repository_data.py", line 424, in get_all_jobs
-    self._all_jobs = self._jobs.get_all_definitions()
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/definitions/repository_definition/caching_index.py", line 93, in get_all_definitions
-    sorted(
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/definitions/repository_definition/caching_index.py", line 124, in get_definition
-    definition = cast(Callable, definition_source)()
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/definitions/repository_definition/repository_data_builder.py", line 125, in resolve_unresolved_job_def
-    job_def = unresolved_job_def.resolve(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/definitions/unresolved_asset_job_definition.py", line 188, in resolve
-    job_asset_graph = get_asset_graph_for_job(asset_graph, self.selection)
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/definitions/asset_job.py", line 226, in get_asset_graph_for_job
-    selected_keys = selection.resolve(parent_asset_graph)
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/definitions/asset_selection.py", line 474, in resolve
-    return self.resolve_inner(asset_graph, allow_missing=allow_missing)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/definitions/asset_selection.py", line 1036, in resolve_inner
-    raise DagsterInvalidSubsetError(
-"""
 
 # TODO
 #  rename to generate_job_submission_scripts
@@ -1029,14 +992,24 @@ def job_info_file(
     # https://docs.thinkboxsoftware.com/products/deadline/10.2/1_User%20Manual/manual/manual-submission.html#job-info-file-options
     render_output_directory.mkdir(parents=True, exist_ok=True)
     path = render_output_directory / "jobinfo_info.txt"
+
+    job_info_file_str = textwrap.dedent(
+        f"""\
+        InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}
+        BatchName={batch_name}
+        Name={job_title_str}
+        Frames={frames}
+        ChunkSize={combine_dicts["yaml_submission"]["chunk_size"]}
+        Plugin=CommandLine
+        StartupDirectory=
+        """
+    )
+
+
+
     with open(path, "w") as job_info_file:
-        job_info_file.write(f'InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}\n')
-        job_info_file.write(f'BatchName={batch_name}\n')
-        job_info_file.write(f'Name={job_title_str}\n')
-        job_info_file.write(f'Frames={frames}\n')
-        job_info_file.write(f'ChunkSize={combine_dicts["yaml_submission"]["chunk_size"]}\n')
-        job_info_file.write(f'Plugin=CommandLine\n')
-        job_info_file.write(f'StartupDirectory=\n')
+        job_info_file.write(job_info_file_str)
+
         for prop in props:
             job_info_file.write(f'{prop}\n')
 
@@ -1330,40 +1303,53 @@ def job_draft_png(
     draft_out_dir.mkdir(parents=True, exist_ok=True)
 
     path_job_info = draft_out_dir / f"job_draft_{codec}_info_job.txt"
+
+    job_info_file_str = textwrap.dedent(
+        f"""\
+        BatchName={batch_name}
+        Name={job_title_str} (Draft {codec.upper()})
+        Frames={frame_start_absolute}-{frame_end_absolute}
+        Priority=0
+        ChunkSize=1000000
+        Plugin=DraftPlugin
+        OutputDirectory0={draft_out_dir}
+        OutputFilename0={render_output_filename["padding_deadline"]}
+        InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}
+        """
+    )
+
     with open(path_job_info, "w") as job_info_file:
-        job_info_file.write(f'BatchName={batch_name}\n')
-        job_info_file.write(f'Name={job_title_str} (Draft {codec.upper()})\n')
-        job_info_file.write(f'Frames={frame_start_absolute}-{frame_end_absolute}\n')
-        job_info_file.write(f'Priority=0\n')
-        job_info_file.write(f'ChunkSize=1000000\n')
-        job_info_file.write(f'Plugin=DraftPlugin\n')
-        job_info_file.write(f'OutputDirectory0={draft_out_dir}\n')
-        job_info_file.write(f'OutputFilename0={render_output_filename["padding_deadline"]}\n')
-        job_info_file.write(f'InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}\n')
+        job_info_file.write(job_info_file_str)
 
     path_plugin_info = draft_out_dir/f"job_draft_{codec}_info_plugin.txt"
+
+    plugin_info_file_str = textwrap.dedent(
+        f"""\
+        ScriptArg0=resolution="{CONFIG.RESOLUTION_DRAFT_SCALE}"
+        ScriptArg1=codec="{codec}"
+        ScriptArg2=colorSpaceIn="Identity"
+        ScriptArg3=colorSpaceOut="Identity"
+        ScriptArg4=annotationsString="{annotations_string}"
+        ScriptArg5=annotationsImageString="None"
+        ScriptArg6=annotationsResWidthString="{resolution_draft[0]}"
+        ScriptArg7=annotationsResHeightString="{resolution_draft[1]}"
+        ScriptArg8=annotationsFramePaddingSize="{CONFIG.PADDING}"
+        ScriptArg9=quality="85"
+        ScriptArg10=quickType="{quick_type}"
+        ScriptArg11=isDistributed="False"
+        ScriptArg12=frameList={frame_start_absolute}-{frame_end_absolute}
+        ScriptArg13=startFrame={frame_start_absolute}
+        ScriptArg14=endFrame={frame_end_absolute}
+        ScriptArg15=taskStartFrame={frame_start_absolute}
+        ScriptArg16=taskEndFrame={frame_end_absolute}
+        ScriptArg17=outFolder="{draft_out_dir}"
+        ScriptArg18=outFile="{draft_out_dir}/{job_title}.{"#" * CONFIG.PADDING}.{codec}"
+        ScriptArg19=inFile="{pathlib.Path(render_output_directory / render_output_filename["padding_deadline"]).as_posix()}"
+        """
+    )
+
     with open(path_plugin_info, "w") as plugin_info_file:
-        plugin_info_file.write(f'ScriptArg0=resolution="{CONFIG.RESOLUTION_DRAFT_SCALE}"\n')
-        plugin_info_file.write(f'ScriptArg1=codec="{codec}"\n')
-        plugin_info_file.write(f'ScriptArg2=colorSpaceIn="Identity"\n')
-        plugin_info_file.write(f'ScriptArg3=colorSpaceOut="Identity"\n')
-        plugin_info_file.write(f'ScriptArg4=annotationsString="{annotations_string}"\n')
-        plugin_info_file.write(f'ScriptArg5=annotationsImageString="None"\n')
-        plugin_info_file.write(f'ScriptArg6=annotationsResWidthString="{resolution_draft[0]}"\n')
-        plugin_info_file.write(f'ScriptArg7=annotationsResHeightString="{resolution_draft[1]}"\n')
-        plugin_info_file.write(f'ScriptArg8=annotationsFramePaddingSize="{CONFIG.PADDING}"\n')
-        plugin_info_file.write(f'ScriptArg9=quality="85"\n')
-        plugin_info_file.write(f'ScriptArg10=quickType="{quick_type}"\n')
-        plugin_info_file.write(f'ScriptArg11=isDistributed="False"\n')
-        plugin_info_file.write(f'ScriptArg12=frameList={frame_start_absolute}-{frame_end_absolute}\n')
-        plugin_info_file.write(f'ScriptArg13=startFrame={frame_start_absolute}\n')
-        plugin_info_file.write(f'ScriptArg14=endFrame={frame_end_absolute}\n')
-        plugin_info_file.write(f'ScriptArg15=taskStartFrame={frame_start_absolute}\n')
-        plugin_info_file.write(f'ScriptArg16=taskEndFrame={frame_end_absolute}\n')
-        plugin_info_file.write(f'ScriptArg17=outFolder="{draft_out_dir}"\n')
-        plugin_info_file.write('ScriptArg18=outFile="{}/{}.{}.{}"\n'.format(draft_out_dir, job_title, "#" * CONFIG.PADDING, codec))
-        in_file = render_output_directory / render_output_filename["padding_deadline"]
-        plugin_info_file.write(f'ScriptArg19=inFile="{str(in_file)}"\n')
+        plugin_info_file.write(plugin_info_file_str)
 
     ret = {
         "JobInfoFilePath": str(path_job_info),
@@ -1417,8 +1403,6 @@ def job_draft_mov(
     frame_end_absolute = combine_dicts["yaml_submission"]["frame_end"]
     job_title = combine_dicts["yaml_submission"]["job_title"]
 
-    annotations_string = annotations_string
-
     quick_type = "createMovie"
     extension = "mov"
     _codec = "h264"
@@ -1427,42 +1411,55 @@ def job_draft_mov(
     draft_out_dir.mkdir(parents=True, exist_ok=True)
 
     path_job_info = draft_out_dir / f"job_draft_{extension}_info_job.txt"
+
+    job_info_file_str = textwrap.dedent(
+        f"""\
+        BatchName={batch_name}
+        Name={job_title_str} (Draft {extension.upper()})
+        Frames={frame_start_absolute}-{frame_end_absolute}
+        Priority=0
+        ChunkSize=1000000
+        Plugin=DraftPlugin
+        OutputDirectory0={draft_out_dir}
+        OutputFilename0={render_output_filename["padding_deadline"]}
+        InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}
+        """
+    )
+
     with open(path_job_info, "w") as job_info_file:
-        job_info_file.write(f'BatchName={batch_name}\n')
-        job_info_file.write(f'Name={job_title_str} (Draft {extension.upper()})\n')
-        job_info_file.write(f'Frames={frame_start_absolute}-{frame_end_absolute}\n')
-        job_info_file.write(f'Priority=0\n')
-        job_info_file.write(f'ChunkSize=1000000\n')
-        job_info_file.write(f'Plugin=DraftPlugin\n')
-        job_info_file.write(f'OutputDirectory0={draft_out_dir}\n')
-        job_info_file.write(f'OutputFilename0={render_output_filename["padding_deadline"]}\n')
-        job_info_file.write(f'InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}\n')
+        job_info_file.write(job_info_file_str)
 
     path_plugin_info = draft_out_dir / f"job_draft_{extension}_info_plugin.txt"
+
+    plugin_info_file_str = textwrap.dedent(
+        f"""\
+        ScriptArg0=resolution="{CONFIG.RESOLUTION_DRAFT_SCALE}"
+        ScriptArg1=codec="{_codec}"
+        ScriptArg2=colorSpaceIn="Identity"
+        ScriptArg3=colorSpaceOut="Identity"
+        ScriptArg4=annotationsString="{annotations_string}"
+        ScriptArg5=annotationsImageString="None"
+        ScriptArg6=annotationsResWidthString="{resolution_draft[0]}"
+        ScriptArg7=annotationsResHeightString="{resolution_draft[1]}"
+        ScriptArg8=annotationsFramePaddingSize="{CONFIG.PADDING}"
+        ScriptArg9=quality="85"
+        ScriptArg10=quickType="{quick_type}"
+        ScriptArg11=isDistributed="False"
+        ScriptArg12=frameList={frame_start_absolute}-{frame_end_absolute}
+        ScriptArg13=startFrame={frame_start_absolute}
+        ScriptArg14=endFrame={frame_end_absolute}
+        ScriptArg15=taskStartFrame=={frame_start_absolute}
+        ScriptArg16=taskEndFrame=={frame_end_absolute}
+        ScriptArg17=frameRate={combine_dicts["entity"]["data"]["fps"]}
+        ScriptArg18=outFolder="{draft_out_dir}"
+        ScriptArg19=outFile="{draft_out_dir}/{job_title}.{extension}"
+        ScriptArg20=inFile="{pathlib.Path(render_output_directory / render_output_filename["padding_deadline"]).as_posix()}"
+        """
+    )
+
     with open(path_plugin_info, "w") as plugin_info_file:
-        plugin_info_file.write(f'ScriptArg0=resolution="{CONFIG.RESOLUTION_DRAFT_SCALE}"\n')
-        plugin_info_file.write(f'ScriptArg1=codec="{_codec}"\n')
-        plugin_info_file.write(f'ScriptArg2=colorSpaceIn="Identity"\n')
-        plugin_info_file.write(f'ScriptArg3=colorSpaceOut="Identity"\n')
-        plugin_info_file.write(f'ScriptArg4=annotationsString="{annotations_string}"\n')
-        plugin_info_file.write(f'ScriptArg5=annotationsImageString="None"\n')
-        plugin_info_file.write(f'ScriptArg6=annotationsResWidthString="{resolution_draft[0]}"\n')
-        plugin_info_file.write(f'ScriptArg7=annotationsResHeightString="{resolution_draft[1]}"\n')
-        plugin_info_file.write(f'ScriptArg8=annotationsFramePaddingSize="{CONFIG.PADDING}"\n')
-        plugin_info_file.write(f'ScriptArg9=quality="85"\n')
-        plugin_info_file.write(f'ScriptArg10=quickType="{quick_type}"\n')
-        plugin_info_file.write(f'ScriptArg11=isDistributed="False"\n')
-        plugin_info_file.write(f'ScriptArg12=frameList={frame_start_absolute}-{frame_end_absolute}\n')
-        plugin_info_file.write(f'ScriptArg13=startFrame={frame_start_absolute}\n')
-        plugin_info_file.write(f'ScriptArg14=endFrame={frame_end_absolute}\n')
-        plugin_info_file.write(f'ScriptArg15=taskStartFrame=={frame_start_absolute}\n')
-        plugin_info_file.write(f'ScriptArg16=taskEndFrame=={frame_end_absolute}\n')
+        plugin_info_file.write(plugin_info_file_str)
         # TODO show and shot fps
-        plugin_info_file.write('ScriptArg17=frameRate={}\n'.format(combine_dicts["entity"]["data"]["fps"]))
-        plugin_info_file.write(f'ScriptArg18=outFolder="{draft_out_dir}"\n')
-        plugin_info_file.write(f'ScriptArg19=outFile="{draft_out_dir}/{job_title}.{extension}"\n')
-        in_file = render_output_directory / render_output_filename["padding_deadline"]
-        plugin_info_file.write(f'ScriptArg20=inFile="{str(in_file)}"\n')
 
     ret = {
         "JobInfoFilePath": str(path_job_info),
@@ -1615,29 +1612,43 @@ def job_kitsu_publish(
                               f'Job file: `{combine_dicts["yaml_submission"]["job_file"]}`<br>'
                               f'<QUOTE>'
                               f''])
-    args.extend(['--host', f'<QUOTE>{"http://10.1.2.15:4545/api"}<QUOTE>'])
-    args.extend(['--user', f'<QUOTE>{"admin@example.com"}<QUOTE>'])
-    args.extend(['--password', f'<QUOTE>{"mysecretpassword"}<QUOTE>'])
+    args.extend(['--host', f'<QUOTE>{"http://10.1.2.15:4545/api"}<QUOTE>'])  # Todo: make dynamic
+    args.extend(['--user', f'<QUOTE>{"admin@example.com"}<QUOTE>'])  # Todo: make dynamic
+    args.extend(['--password', f'<QUOTE>{"mysecretpassword"}<QUOTE>'])  # Todo: make dynamic
     args.extend(['--movie-file', f'<QUOTE>{draft_out_dir}/{job_title}.{extension}<QUOTE>'])
     args.extend(['--version', f'<QUOTE>{version}<QUOTE>'])
 
     path_job_info = kitsu_job_out_dir / "job_kitsu_publish_info_job.txt"
+
+    job_info_file_str = textwrap.dedent(
+        f"""\
+        BatchName={batch_name}
+        Name={job_title_str} (Kitsu Publish)
+        Frames=1
+        Priority=0
+        ChunkSize=1000000
+        OutputDirectory0={draft_out_dir}
+        OutputFilename0={render_output_filename["padding_deadline"]}
+        InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}
+        Plugin=CommandLine
+        ForceReloadPlugin=True
+        """
+    )
+
     with open(path_job_info, "w") as job_info_file:
-        job_info_file.write(f'BatchName={batch_name}\n')
-        job_info_file.write(f'Name={job_title_str} (Kitsu Publish)\n')
-        job_info_file.write(f'Frames=1\n')
-        job_info_file.write(f'Priority=0\n')
-        job_info_file.write(f'ChunkSize=1000000\n')
-        job_info_file.write(f'OutputDirectory0={draft_out_dir}\n')
-        job_info_file.write(f'OutputFilename0={render_output_filename["padding_deadline"]}\n')
-        job_info_file.write(f'InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}\n')
-        job_info_file.write(f'Plugin=CommandLine\n')
-        job_info_file.write(f'ForceReloadPlugin=True\n')
+        job_info_file.write(job_info_file_str)
 
     path_plugin_info = kitsu_job_out_dir / "job_draft_kitsu_publish_info_plugin.txt"
+
+    plugin_info_file_str = textwrap.dedent(
+        f"""\
+        Executable={executable}
+        Arguments={" ".join(args)}
+        """
+    )
+
     with open(path_plugin_info, "w") as plugin_info_file:
-        plugin_info_file.write(f'Executable={executable}\n')
-        plugin_info_file.write(f'Arguments={" ".join(args)}\n')
+        plugin_info_file.write(plugin_info_file_str)
 
     ret = {
         "JobInfoFilePath": str(path_job_info),
