@@ -1597,6 +1597,7 @@ def job_kitsu_publish(
     args = []
     # Todo:
     #  - [ ] Use gazu[cli] directly
+    #        - [CLI](https://github.com/cgwire/gazu?tab=readme-ov-file#cli)
     args.extend(['<QUOTE>/data/local/.openstudiolandscapes/.landscapes/.persistent/OpenStudioLandscapes-Deadline-10-2/data/opt/Thinkbox/DeadlineRepository10/custom/events/Kitsu/kitsu_submission_cli.py<QUOTE>'])
     args.extend(['--task-id', '<QUOTE>{}<QUOTE>'.format(combine_dicts["yaml_submission"]["kitsu_task"])])
     args.extend(['--comment', f'<QUOTE>'
