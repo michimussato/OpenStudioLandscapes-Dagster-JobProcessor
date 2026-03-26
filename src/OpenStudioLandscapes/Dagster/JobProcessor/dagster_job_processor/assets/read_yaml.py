@@ -1070,7 +1070,7 @@ def render_arguments(
     args = combine_dicts["yaml_submission"]["plugin_dict"]["submitter"]["args"]
 
     combine_dicts["yaml_submission"]["output_format"] = combine_dicts["yaml_submission"]["output_format"].upper()
-    render_output = str(render_output_directory / render_output_filename["padding_command"])
+    render_output = str(render_output_directory / "raw" / render_output_filename["padding_command"])
 
     ret = " ".join(args).format(
         render_output=render_output,
