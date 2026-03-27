@@ -20,7 +20,7 @@ from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.config.mode
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.assets.read_yaml import ASSET_HEADER_JOB_PROCESSOR
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.assets.submit_jobs import ASSET_HEADER_JOB_SUBMITTER
 
-from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.jobs import submit_synced_jobs, ingest_synced_jobs
+from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.jobs import submit_synced_jobs, ingest_synced_jobs, ingest_synced_jobs_yaml
 
 
 CONFIG: DefaultConstants = DefaultConstants()
@@ -160,7 +160,7 @@ def ingestion_sensor(
 
 
 @sensor(
-    job=ingest_synced_jobs,
+    job=ingest_synced_jobs_yaml,
     default_status=settings.SENSORS_STATUS,
     minimum_interval_seconds=15,
 )
