@@ -632,19 +632,25 @@ def show_name(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "read_job_py": AssetIn(),
-        "get_kitsu_task_dict": AssetIn(),
+        "get_kitsu_task_dict": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "get_kitsu_task_dict"])
+        ),
+        # "job_model": AssetIn(
+        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
+        # ),
     }
 )
 def task_name(
         context: AssetExecutionContext,
-        read_job_py: dict,
-        get_kitsu_task_dict: dict,
+        get_kitsu_task_dict: Dict,
+        # job_model: JobBase,
 ) -> Generator[Output[str | Any] | AssetMaterialization | Any, Any, None]:
-    if bool(read_job_py["kitsu_task"]):
-        ret = get_kitsu_task_dict["task_type"]["name"]
-    else:
-        ret = "No Task Name"
+
+    ret = (
+        get_kitsu_task_dict
+        .get("kitsu_task", {})
+        .get("name", "No Task Name")
+    )
 
     yield Output(ret)
 
