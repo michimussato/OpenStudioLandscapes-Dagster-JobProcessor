@@ -84,7 +84,7 @@ class JobBase(BaseModel):
         description="The chunk size",
     )
     deadline_initial_status: InitialStatuses = Field(
-        default=InitialStatuses.SUSPENDED.value,
+        default=InitialStatuses.SUSPENDED,
         description="The initial job status after submission",
         examples=[i.name for i in OutputFormats],
     )
