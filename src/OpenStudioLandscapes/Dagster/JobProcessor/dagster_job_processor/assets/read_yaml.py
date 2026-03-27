@@ -285,7 +285,6 @@ def get_task_name(
     """
     _task_name = (
         kitsu_dict
-        .get("kitsu_task", {})
         .get("task_type", {})
         .get("name", "No Task Name")
     )
