@@ -112,21 +112,25 @@ def read_job_yaml(
 ) -> Generator[Output[JobBase] | AssetMaterialization | Any, Any, None]:
 
     with open(config.filename) as fr:
-        job_ = yaml.safe_load(fr)
+        job_dict = yaml.safe_load(fr)
+
+    context.log.debug(f"{job_dict = }")
 
     job_model: JobBase = JobBase(
-        **job_
+        **job_dict
     )
 
-    parent = config.filename
 
-    spec = importlib.util.spec_from_file_location(str(pathlib.Path(parent).parent).replace(os.sep, '.'), parent)
-    module_from_spec = importlib.util.module_from_spec(spec)
-    sys.modules[str(pathlib.Path(parent).parent).replace(os.sep, '.')] = module_from_spec
-    spec.loader.exec_module(module_from_spec)
-    job = module_from_spec.job
 
-    job["job_file_py"] = config.filename
+    # parent = config.filename
+    #
+    # spec = importlib.util.spec_from_file_location(str(pathlib.Path(parent).parent).replace(os.sep, '.'), parent)
+    # module_from_spec = importlib.util.module_from_spec(spec)
+    # sys.modules[str(pathlib.Path(parent).parent).replace(os.sep, '.')] = module_from_spec
+    # spec.loader.exec_module(module_from_spec)
+    # job = module_from_spec.job
+    #
+    # job["job_file_py"] = config.filename
 
     yield Output(job_model)
 
