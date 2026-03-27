@@ -120,18 +120,6 @@ def read_job_yaml(
         **job_dict
     )
 
-
-
-    # parent = config.filename
-    #
-    # spec = importlib.util.spec_from_file_location(str(pathlib.Path(parent).parent).replace(os.sep, '.'), parent)
-    # module_from_spec = importlib.util.module_from_spec(spec)
-    # sys.modules[str(pathlib.Path(parent).parent).replace(os.sep, '.')] = module_from_spec
-    # spec.loader.exec_module(module_from_spec)
-    # job = module_from_spec.job
-    #
-    # job["job_file_py"] = config.filename
-
     yield Output(job_model)
 
     yield AssetMaterialization(
@@ -212,20 +200,22 @@ def read_job_yaml(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "read_job_py": AssetIn()
+        "job_model": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
+        )
     },
 )
 def get_kitsu_task_dict(
         context: AssetExecutionContext,
         kitsu_resource: KitsuResource,
-        read_job_py: dict,
+        job_model: JobBase,
 ) -> Generator[Output[Any] | AssetMaterialization | Any, Any, None]:
     """Returns a Kitsu task dict as a MaterializeResult object in the JSON format."""
 
     # TODO: make fail safe
 
-    task_id = read_job_py["kitsu_task"]
-    task_dict = kitsu_resource.get_kitsu_task_dict(task_id=task_id)
+    task_id = job_model.kitsu_task
+    task_dict = kitsu_resource.get_kitsu_task_dict(task_id=str(task_id))
 
     yield Output(task_dict)
 
