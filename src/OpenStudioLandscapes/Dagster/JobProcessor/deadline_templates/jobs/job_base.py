@@ -70,7 +70,7 @@ class JobBase(BaseModel):
     handles: int = Field(
         default=4,
     )
-    output_format: OutputFormats = Field(
+    output_format: str = Field(
         default=OutputFormats.EXR.value,
         description="The render output format",
         examples=[i.name for i in OutputFormats],
@@ -83,8 +83,8 @@ class JobBase(BaseModel):
         default=1,
         description="The chunk size",
     )
-    deadline_initial_status: InitialStatuses = Field(
-        default=InitialStatuses.SUSPENDED,
+    deadline_initial_status: str = Field(
+        default=InitialStatuses.SUSPENDED.value,
         description="The initial job status after submission",
         examples=[i.name for i in OutputFormats],
     )
