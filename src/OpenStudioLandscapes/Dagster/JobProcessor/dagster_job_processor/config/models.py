@@ -40,6 +40,9 @@ class DefaultConstants(BaseModel):
     PADDING: int = Field(
         default=4,
     )
+    PADDING_VERSION: int = Field(
+        default=3,
+    )
     JSON_INDENT: int = Field(
         default=2,
     )

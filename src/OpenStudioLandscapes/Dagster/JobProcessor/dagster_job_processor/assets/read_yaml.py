@@ -674,20 +674,17 @@ def render_version_directory(
         task_name: str,
         CONFIG: DefaultConstants,
         job_model: JobBase,
-) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
+) -> Generator[Output[pathlib.Path] | AssetMaterialization | Any, Any, None]:
 
     # TODO: make this fail safe
-    if bool(job_model.kitsu_task):
-        entity_name = get_kitsu_task_dict["entity"]["name"]
-    else:
-        entity_name = "No Entity Name"
+    entity_name = get_entity_name(get_kitsu_task_dict)
 
-    entity_type = f'{get_kitsu_task_dict["entity_type"]["name"]}/{entity_name}'
+    entity_type = get_entity_type(get_kitsu_task_dict)
 
-    _out = pathlib.Path(f'{CONFIG.OUTPUT_ROOT}/{show_name}/{entity_type}/{task_name}/')
+    _out = pathlib.Path(f'{CONFIG.OUTPUT_ROOT}/{show_name}/{entity_type}/{entity_name}/{task_name}/')
     _out.mkdir(parents=True, exist_ok=True)
 
-    yield Output(str(_out))
+    yield Output(_out)
 
     yield AssetMaterialization(
         asset_key=context.asset_key,
@@ -701,25 +698,30 @@ def render_version_directory(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "combine_dicts": AssetIn(),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
+        ),
+        "render_version_directory": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_version_directory"]),
+        ),
     },
 )
 def version(
         context: AssetExecutionContext,
         combine_dicts: dict,
+        CONFIG: DefaultConstants,
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
     # This directory must exist in order for it to be iterable
 
-    padding = 3
-
     render_version_directory = pathlib.Path(combine_dicts["yaml_submission"]["render_version_directory"])
 
-    pattern = re.compile(f"^[0-9]{{{padding}}}")
+    pattern = re.compile(f"^[0-9]{{{CONFIG.PADDING_VERSION}}}")
 
     dirs = [i.name for i in render_version_directory.iterdir() if i.is_dir() and pattern.match(i.name)]
-    dirs.append(str(0).zfill(padding))
+    dirs.append(str(0).zfill(CONFIG.PADDING_VERSION))
     dirs.sort()
     version_ = max(dirs)
-    new_version = str(int(version_) + 1).zfill(padding)
+    new_version = str(int(version_) + 1).zfill(CONFIG.PADDING_VERSION)
     new_version_dir = pathlib.Path(f"{render_version_directory}/{new_version}")
     new_version_dir.mkdir(parents=True, exist_ok=True)
 
