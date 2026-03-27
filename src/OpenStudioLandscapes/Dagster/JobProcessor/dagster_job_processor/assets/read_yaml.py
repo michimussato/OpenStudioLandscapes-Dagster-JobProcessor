@@ -617,7 +617,6 @@ def show_name(
 
     ret = (
         get_kitsu_task_dict
-        .get("kitsu_task", {})
         .get("project", {})
         .get("name", "No Show")
     )
@@ -799,7 +798,7 @@ def fps(
     kitsu_entity_type = get_kitsu_task_dict.get("entity_type", {}).get("name", "Not defined")
     fps_kitsu_shot = float(0)
     if kitsu_entity_type == "Shot":
-        fps_kitsu_shot = float(get_kitsu_task_dict.get("entity", {}).get("data", {}).get("fps", 0))
+        fps_kitsu_entity = fps_kitsu_shot = float(get_kitsu_task_dict.get("entity", {}).get("data", {}).get("fps", 0))
 
     yield Output(fps_job)
 
