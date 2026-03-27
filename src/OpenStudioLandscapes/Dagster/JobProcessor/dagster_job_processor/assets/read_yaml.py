@@ -655,15 +655,21 @@ def combine_dicts(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "get_kitsu_task_dict": AssetIn(),
-        "show_name": AssetIn(),
-        "task_name": AssetIn(),
+        "get_kitsu_task_dict": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "get_kitsu_task_dict"]),
+        ),
+        "show_name": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "show_name"]),
+        ),
+        "task_name": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "task_name"]),
+        ),
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
-        "job_model": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
-        ),
+        # "job_model": AssetIn(
+        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
+        # ),
     },
 )
 def render_version_directory(
@@ -672,7 +678,7 @@ def render_version_directory(
         show_name: str,
         task_name: str,
         CONFIG: DefaultConstants,
-        job_model: JobBase,
+        # job_model: JobBase,
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization | Any, Any, None]:
 
     # TODO: make this fail safe
@@ -696,7 +702,6 @@ def render_version_directory(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "combine_dicts": AssetIn(),
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
@@ -707,13 +712,10 @@ def render_version_directory(
 )
 def version(
         context: AssetExecutionContext,
-        combine_dicts: dict,
         CONFIG: DefaultConstants,
         render_version_directory: pathlib.Path,
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
     # This directory must exist in order for it to be iterable
-
-    render_version_directory = pathlib.Path(combine_dicts["yaml_submission"]["render_version_directory"])
 
     pattern = re.compile(f"^[0-9]{{{CONFIG.PADDING_VERSION}}}")
 
