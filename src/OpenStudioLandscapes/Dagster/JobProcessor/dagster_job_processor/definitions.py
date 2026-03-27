@@ -11,8 +11,12 @@ from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.assets impo
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.resources import (
     KitsuResource,
 )
-from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.sensors import submission_sensor, ingestion_sensor, my_custom_auto_materialize_sensor
-
+from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.sensors import (
+    submission_sensor,
+    ingestion_sensor,
+    my_custom_auto_materialize_sensor,
+    ingestion_sensor_yaml,
+)
 
 read_yaml_assets = load_assets_from_modules(
     modules=[read_yaml],
@@ -23,7 +27,12 @@ read_yaml_assets = load_assets_from_modules(
 submit_jobs_assets = load_assets_from_modules([submit_jobs])
 
 
-all_sensors = [submission_sensor, ingestion_sensor, my_custom_auto_materialize_sensor]
+all_sensors = [
+    submission_sensor,
+    ingestion_sensor,
+    ingestion_sensor_yaml,
+    my_custom_auto_materialize_sensor,
+]
 
 
 resources = {
