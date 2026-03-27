@@ -173,7 +173,7 @@ def ingestion_sensor_yaml(
 
     moves = []
 
-    for job_yaml in path_to_submission_files.glob('*.y[a]ml'):
+    for job_yaml in path_to_submission_files.glob('*.[yml yaml]'):
 
         context.log.info(f'Checking {job_yaml}...')
 
