@@ -710,6 +710,7 @@ def version(
         context: AssetExecutionContext,
         combine_dicts: dict,
         CONFIG: DefaultConstants,
+        render_version_directory: pathlib.Path,
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
     # This directory must exist in order for it to be iterable
 
