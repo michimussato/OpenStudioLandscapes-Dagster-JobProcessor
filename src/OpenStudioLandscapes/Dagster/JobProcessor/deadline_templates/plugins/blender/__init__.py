@@ -1,4 +1,5 @@
 import enum
+from typing import List
 
 from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.plugin_base import plugin, PluginBase
 
@@ -22,7 +23,7 @@ class RenderEngine(enum.StrEnum):
 
 
 class PluginBlenderBase(PluginBase):
-    args = [
+    args: List = [
         "--background",
         '<QUOTE>"{job_file}"<QUOTE>',
         "--render-output", '<QUOTE>"{render_output}"<QUOTE>',

@@ -1,3 +1,5 @@
+from typing import List
+
 from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.plugin_base import plugin, PluginBase
 from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.jobs.job_base import job
 
@@ -33,7 +35,7 @@ plugin["submitter"]["args"].append('<QUOTE>\\\"{render_output}\\\"<QUOTE>')
 
 
 class PluginNukeBase(PluginBase):
-    args = [
+    args: List = [
         "--nukex",
         "-t",  # terminal only (no gui); if <script> is a .py file it will be executed
         "-f",  # render at full size (turns off proxy; use -p to force render at proxy)

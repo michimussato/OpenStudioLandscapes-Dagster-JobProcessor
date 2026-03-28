@@ -1,3 +1,4 @@
+import os
 import pathlib
 
 from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins import *
@@ -7,4 +8,4 @@ plugin["submitter"]["executable"] = pathlib.Path(REZ_PACKAGES / "blender" / "4.1
 
 
 class PluginBlender_4_1_1(PluginBlenderBase):
-    executable = REZ_PACKAGES / "blender" / "4.1.1" / "blender"
+    executable: os.PathLike = REZ_PACKAGES / "blender" / "4.1.1" / "blender"
