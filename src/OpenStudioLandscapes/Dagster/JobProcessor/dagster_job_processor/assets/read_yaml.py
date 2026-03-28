@@ -1725,19 +1725,24 @@ def render_arguments(
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
     args = job_model.plugin_model.args
 
-    # why output_format has to be capital here?
-    # combine_dicts["yaml_submission"]["output_format"] = combine_dicts["yaml_submission"]["output_format"].upper()
+    # Todo:
+    #  - [ ] why output_format had to be capital here?
+    #        combine_dicts["yaml_submission"]["output_format"] = combine_dicts["yaml_submission"]["output_format"].upper()
     render_output = str(render_output_directory / "raw" / render_output_filename["padding_command"])
+
+    job_model_dict = json.loads(
+        job_model.model_dump_json(
+            fallback=str,
+        )
+    )
+
+    context.log.debug(f"{args = }")
+    context.log.debug(f"{render_output = }")
+    context.log.debug(f"{job_model_dict = }")
 
     ret = " ".join(args).format(
         render_output=render_output,
-        **json.loads(
-            job_model.model_dump_json(
-                fallback=str,
-            )
-        ),
-
-        # **combine_dicts["yaml_submission"],
+        **job_model_dict,
     )
 
     yield Output(ret)
