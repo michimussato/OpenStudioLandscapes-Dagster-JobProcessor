@@ -6,7 +6,6 @@ __all__ = [
     "PROJECTS_ROOT",
 ]
 
-import enum
 import pathlib
 
 REZ_PACKAGES: pathlib.Path = pathlib.Path("/data/share/rez-packages/packages")

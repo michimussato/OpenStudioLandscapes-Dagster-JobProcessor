@@ -1,9 +1,9 @@
 import os
 
 from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins import *
-from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.nuke import plugin, PluginNukeBase
+from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.nuke import PluginNukeBase
 
-plugin["submitter"]["executable"] = REZ_PACKAGES / "nuke" / "15.0v4" / "Nuke15.0"
+# plugin["submitter"]["executable"] = REZ_PACKAGES / "nuke" / "15.0v4" / "Nuke15.0"
 
 
 class PluginNuke_15_0(PluginNukeBase):
