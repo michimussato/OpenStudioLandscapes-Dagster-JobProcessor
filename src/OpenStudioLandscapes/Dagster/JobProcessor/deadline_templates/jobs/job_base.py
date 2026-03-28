@@ -141,9 +141,3 @@ class JobBase(BaseModel):
         default=(1920, 1080),
         description="Frames per second",
     )
-
-
-# class JobBlender_4_1_1(JobBase):
-#     plugin_model: PluginBlender_4_1_1 = Field(
-#         # default=None,
-#     )
