@@ -53,7 +53,7 @@ class JobBase(BaseModel):
         examples=["/server/scenes/blender/sh030_001.blend"]
     )
     # plugin_model: PluginBase = Field(
-    plugin_model: Union[Plugins, None] = Field(
+    plugin_model: Plugins = Field(
         default=None,
         description="The plugin model",
         examples=[i.value for i in Plugins],

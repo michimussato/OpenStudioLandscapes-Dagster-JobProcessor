@@ -17,6 +17,8 @@ import json
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.config.models import DefaultConstants
 from OpenStudioLandscapes.Dagster.JobProcessor.dagster_job_processor.resources import KitsuResource
 from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.jobs.job_base import JobBase
+from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.blender.plugin_blender__4_1_1 import \
+    PluginBlender_4_1_1
 
 # TODO
 #  rename to generate_job_submission_scripts
@@ -401,6 +403,10 @@ def read_job_yaml(
         context: AssetExecutionContext,
         config: IngestJobConfig,
 ) -> Generator[Output[JobBase] | AssetMaterialization | Any, Any, None]:
+
+    temp = PluginBlender_4_1_1()
+
+    context.log.debug(yaml.safe_dump(temp.model_dump_json(fallback=str, indent=2)))
 
     with open(config.filename) as fr:
         job_dict = yaml.safe_load(fr)
