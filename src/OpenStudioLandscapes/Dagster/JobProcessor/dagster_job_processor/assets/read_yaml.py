@@ -1804,21 +1804,34 @@ def plugin_info_file(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "combine_dicts": AssetIn(),
-        "render_output_directory": AssetIn(),
-        "job_info_file": AssetIn(),
-        "plugin_info_file": AssetIn(),
-        "job_draft_png": AssetIn(),
-        "job_draft_mov": AssetIn(),
-        "job_kitsu_publish": AssetIn(),
+        "render_output_directory": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"])
+        ),
+        "job_info_file": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_info_file"])
+        ),
+        "plugin_info_file": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "plugin_info_file"])
+        ),
+        "job_draft_png": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_draft_png"])
+        ),
+        "job_draft_mov": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_draft_mov"])
+        ),
+        "job_kitsu_publish": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_kitsu_publish"])
+        ),
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
+        ),
+        "job_model": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
         ),
     }
 )
 def job_submission_tree(
         context: AssetExecutionContext,
-        combine_dicts: dict,
         render_output_directory: pathlib.Path,
         job_info_file: pathlib.Path,
         plugin_info_file: pathlib.Path,
@@ -1826,6 +1839,7 @@ def job_submission_tree(
         job_draft_mov: dict,
         job_kitsu_publish: dict,
         CONFIG: DefaultConstants,
+        job_model: JobBase,
 ) -> Generator[Output[dict[str, list[str]]] | AssetMaterialization | Any, Any, None]:
 
     ####
@@ -1867,7 +1881,7 @@ def job_submission_tree(
     jobs.append(job_0)
     i += 1
 
-    if combine_dicts["yaml_submission"]["append_draft_job_png"]:
+    if job_model.append_draft_job_png:
 
         job = job_dict_template.copy()
         job["JobInfoFilePath"] = str(job_draft_png["JobInfoFilePath"])
@@ -1883,7 +1897,7 @@ def job_submission_tree(
         job_draft_png_index = i
         i += 1
 
-    if combine_dicts["yaml_submission"]["append_draft_job_mov"]:
+    if job_model.append_draft_job_mov:
 
         job = job_dict_template.copy()
         job["JobInfoFilePath"] = str(job_draft_mov["JobInfoFilePath"])
@@ -1899,7 +1913,7 @@ def job_submission_tree(
         job_draft_mov_index = i
         i += 1
 
-    if bool(combine_dicts["yaml_submission"]["kitsu_task"]) and bool(combine_dicts["yaml_submission"]["with_kitsu_publish"]):
+    if bool(job_model.kitsu_task) and job_model.with_kitsu_publish:
 
         job = job_dict_template.copy()
         job["JobInfoFilePath"] = str(job_kitsu_publish["JobInfoFilePath"])
@@ -2273,18 +2287,12 @@ def resolution(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        # "combine_dicts": AssetIn(
-        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "combine_dicts"])
-        # ),
         "render_arguments": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_arguments"])
         ),
         "render_output_directory": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"])
         ),
-        # "render_output_filename": AssetIn(
-        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_filename"])
-        # ),
         "version": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "version"])
         ),
@@ -2313,10 +2321,8 @@ def resolution(
 )
 def job_kitsu_publish(
         context: AssetExecutionContext,
-        # combine_dicts: dict,
         render_arguments: str,
         render_output_directory: pathlib.Path,
-        # render_output_filename: dict,
         version: str,
         batch_name: str,
         job_title_str: str,
@@ -2336,7 +2342,6 @@ def job_kitsu_publish(
     extension = "mov"
 
     handles = job_model.handles
-    # job_title = combine_dicts["yaml_submission"]["job_title"]
 
     # TODO this is needed to find the movie, but could be more elegant
     draft_out_dir = render_output_directory / "draft" / extension
