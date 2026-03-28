@@ -406,7 +406,7 @@ def read_job_yaml(
 
     temp = PluginBlender_4_1_1()
 
-    context.log.debug(yaml.safe_dump(temp.model_dump_json(fallback=str, indent=2)))
+    context.log.debug(yaml.safe_dump(json.loads(temp.model_dump_json(fallback=str, indent=2))))
 
     with open(config.filename) as fr:
         job_dict = yaml.safe_load(fr)
