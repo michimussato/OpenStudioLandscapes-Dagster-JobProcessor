@@ -414,7 +414,7 @@ def read_job_yaml(
 
     job_model: JobBase = JobBase(
         **job_dict,
-        job_file_yaml=config.filename,
+        job_file_yaml=pathlib.Path(config.filename),
     )
 
     context.log.debug(f"{job_model = }")
@@ -1672,7 +1672,6 @@ def job_info_file(
         "render_output_directory": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"])
         ),
-        # "combine_dicts": AssetIn(),
         "job_model": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
         ),
@@ -1681,7 +1680,6 @@ def job_info_file(
 def paste_job_py(
         context: AssetExecutionContext,
         render_output_directory: pathlib.Path,
-        # combine_dicts: dict,
         job_model: JobBase,
 ) -> Generator[Output[Path] | AssetMaterialization | Any, Any, None]:
 
@@ -2469,6 +2467,9 @@ def job_kitsu_publish(
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
+        "job_model": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
+        ),
     },
 )
 def export_combined_dict(
@@ -2477,14 +2478,34 @@ def export_combined_dict(
         combine_dicts: dict,
         job_submission_tree: dict,
         CONFIG: DefaultConstants,
+        job_model: JobBase,
 ) -> Generator[Output[Path] | AssetMaterialization | Any, Any, None]:
+
+    job_model.farm_cmd = job_submission_tree
 
     combine_dicts["deadline_cmd"] = job_submission_tree
 
     out = render_output_directory / "combined_dict.json"
 
+    # model_dict = json.loads(
+    #     job_model.model_dump_json(
+    #         fallback=str,
+    #         indent=CONFIG.JSON_INDENT,
+    #     )
+    # )
+
+    model_dict = job_model.model_dump(
+        fallback=str,
+    )
+
     with open(out, "w") as fo:
-        json.dump(combine_dicts, fo, indent=CONFIG.JSON_INDENT, sort_keys=True)
+        json.dump(
+            obj=model_dict,
+            fp=fo,
+            indent=CONFIG.JSON_INDENT,
+            sort_keys=True,
+            default=str,
+        )
 
     yield Output(out)
 

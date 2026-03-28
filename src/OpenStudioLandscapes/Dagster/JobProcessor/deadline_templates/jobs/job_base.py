@@ -2,7 +2,7 @@ import datetime
 import pathlib
 import uuid
 import enum
-from typing import Tuple, Union
+from typing import Tuple, Union, Dict
 
 from pydantic import BaseModel, Field
 
@@ -64,6 +64,12 @@ class JobBase(BaseModel):
             "/server/jobs/job2.yml",
         ]
     )
+
+    farm_cmd: Dict = Field(
+        default_factory=dict,
+        description="The command to run to send the job to the render farm",
+    )
+
     plugin_model: Union[
         PluginBlender_4_1_1,
         PluginHoudini_19_5_805,
