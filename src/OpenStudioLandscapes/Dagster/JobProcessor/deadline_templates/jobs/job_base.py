@@ -6,8 +6,7 @@ from typing import Tuple, Union
 
 from pydantic import BaseModel, Field
 
-# from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.plugin_base import PluginBase
-from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.enum_plugins import Plugins
+from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.blender.plugin_blender__4_1_1 import PluginBlender_4_1_1
 
 
 class InitialStatuses(enum.StrEnum):
@@ -52,11 +51,12 @@ class JobBase(BaseModel):
         description="The file to render",
         examples=["/server/scenes/blender/sh030_001.blend"]
     )
-    # plugin_model: PluginBase = Field(
-    plugin_model: Plugins = Field(
-        default=None,
+    plugin_model: Union[
+        PluginBlender_4_1_1,
+    ] = Field(
+        # default=None,
         description="The plugin model",
-        examples=[i.value for i in Plugins],
+        # examples=[i.value for i in Plugins],
     )
     plugin_file: os.PathLike = Field(
         # This is probably not necessary anymore when working with YAML files
@@ -134,3 +134,9 @@ class JobBase(BaseModel):
         default=(1920, 1080),
         description="Frames per second",
     )
+
+
+# class JobBlender_4_1_1(JobBase):
+#     plugin_model: PluginBlender_4_1_1 = Field(
+#         # default=None,
+#     )
