@@ -2,7 +2,7 @@ import datetime
 import os
 import uuid
 import enum
-from typing import Tuple
+from typing import Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -53,10 +53,10 @@ class JobBase(BaseModel):
         examples=["/server/scenes/blender/sh030_001.blend"]
     )
     # plugin_model: PluginBase = Field(
-    plugin_model: Plugins = Field(
+    plugin_model: Union[Plugins, None] = Field(
         default=None,
         description="The plugin model",
-        examples=[i.name for i in Plugins],
+        examples=[i.value for i in Plugins],
     )
     plugin_file: os.PathLike = Field(
         # This is probably not necessary anymore when working with YAML files
