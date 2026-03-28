@@ -2390,6 +2390,7 @@ def job_kitsu_publish(
     #            task-types     List task types.
     #            tasks          List tasks for a project.
     args.extend(['<QUOTE>/data/local/.openstudiolandscapes/.landscapes/.persistent/OpenStudioLandscapes-Deadline-10-2/data/opt/Thinkbox/DeadlineRepository10/custom/events/Kitsu/kitsu_submission_cli.py<QUOTE>'])
+    args.extend(['--very-verbose'])
     args.extend(['--task-id', '<QUOTE>{}<QUOTE>'.format(str(job_model.kitsu_task))])
     args.extend(['--comment', f'<QUOTE>'
                               f'Output directory: `{render_output_directory}`<br>'
