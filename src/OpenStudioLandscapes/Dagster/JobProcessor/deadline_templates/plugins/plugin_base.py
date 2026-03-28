@@ -1,11 +1,11 @@
-import os
+import pathlib
 from typing import List
 
 from pydantic import BaseModel, Field
 
 
 class PluginBase(BaseModel):
-    executable: os.PathLike = Field(
+    executable: pathlib.Path = Field(
         default=None,
     )
     output_formats_plugin: List[str] = ["png", "exr", "jpg"]

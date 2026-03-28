@@ -1,4 +1,4 @@
-import os
+import pathlib
 from typing import Literal
 
 from pydantic.fields import Field
@@ -10,7 +10,7 @@ from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.houdin
 class PluginHoudini_19_5_805(PluginHoudiniBase):
     plugin_type: Literal['PluginHoudini_19_5_805']
 
-    executable: os.PathLike = REZ_PACKAGES /  "houdini" / "19.5.805" / "hython"
+    executable: pathlib.Path = REZ_PACKAGES /  "houdini" / "19.5.805" / "hython"
 
     rop: str = Field(
         default="",

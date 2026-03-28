@@ -1,4 +1,4 @@
-import os
+import pathlib
 from typing import Literal
 
 from pydantic import Field
@@ -10,7 +10,7 @@ from OpenStudioLandscapes.Dagster.JobProcessor.deadline_templates.plugins.blende
 class PluginBlender_4_1_1(PluginBlenderBase):
     plugin_type: Literal['PluginBlender_4_1_1']
 
-    executable: os.PathLike = REZ_PACKAGES / "blender" / "4.1.1" / "blender"
+    executable: pathlib.Path = REZ_PACKAGES / "blender" / "4.1.1" / "blender"
 
     render_engine: RenderEngine = Field(
         default=RenderEngine.WORKBENCH.value,

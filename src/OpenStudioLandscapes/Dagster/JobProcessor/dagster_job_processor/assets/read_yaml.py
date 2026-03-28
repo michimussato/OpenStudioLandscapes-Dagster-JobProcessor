@@ -1724,10 +1724,6 @@ def render_arguments(
         job_model: JobBase,
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
     args = job_model.plugin_model.args
-
-    # Todo:
-    #  - [ ] why output_format had to be capital here?
-    #        combine_dicts["yaml_submission"]["output_format"] = combine_dicts["yaml_submission"]["output_format"].upper()
     render_output = str(render_output_directory / "raw" / render_output_filename["padding_command"])
 
     job_model_dict = json.loads(
@@ -1735,6 +1731,10 @@ def render_arguments(
             fallback=str,
         )
     )
+    # Todo:
+    #  - [ ] why output_format had to be capital here?
+    #        combine_dicts["yaml_submission"]["output_format"] = combine_dicts["yaml_submission"]["output_format"].upper()
+    job_model_dict["output_format"]: str = job_model_dict["output_format"].upper()
 
     plugin_model_dict = json.loads(
         job_model.plugin_model.model_dump_json(
@@ -1769,6 +1769,9 @@ def render_arguments(
         "render_output_directory": AssetIn(),
         "combine_dicts": AssetIn(),
         "render_arguments": AssetIn(),
+        "job_model": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
+        ),
     }
 )
 def plugin_info_file(
@@ -1776,13 +1779,15 @@ def plugin_info_file(
         render_output_directory: pathlib.Path,
         combine_dicts: dict,
         render_arguments: str,
+        job_model: JobBase,
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization | Any, Any, None]:
 
     # https://docs.thinkboxsoftware.com/products/deadline/10.2/1_User%20Manual/manual/manual-submission.html#plug-in-info-file
     render_output_directory.mkdir(parents=True, exist_ok=True)
     path = pathlib.Path(f"{render_output_directory}/plugin_info.txt")
     with open(path, "w") as job_info_file:
-        job_info_file.write(f'Executable={combine_dicts["yaml_submission"]["plugin_dict"]["submitter"]["executable"]}\n')
+        # job_info_file.write(f'Executable={combine_dicts["yaml_submission"]["plugin_dict"]["submitter"]["executable"]}\n')
+        job_info_file.write(f'Executable={job_model.plugin_model.executable.as_posix()}\n')
         job_info_file.write(f'Arguments="{render_arguments}"\n')
 
     yield Output(path)
