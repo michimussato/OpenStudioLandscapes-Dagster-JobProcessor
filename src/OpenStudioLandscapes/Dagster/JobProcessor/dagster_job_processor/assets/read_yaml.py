@@ -1289,22 +1289,34 @@ def frames(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "combine_dicts": AssetIn(),
-        "batch_name": AssetIn(),
-        "job_title_str": AssetIn(),
-        "render_output_directory": AssetIn(),
-        "frames": AssetIn(),
-        "props": AssetIn(),
+        "batch_name": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "batch_name"])
+        ),
+        "job_title_str": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_title_str"])
+        ),
+        "render_output_directory": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"])
+        ),
+        "frames": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frames"])
+        ),
+        "props": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "props"])
+        ),
+        "job_model": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
+        ),
     }
 )
 def job_info_file(
         context: AssetExecutionContext,
-        combine_dicts: dict,
         batch_name: str,
         job_title_str: str,
         render_output_directory: pathlib.Path,
         frames: str,
-        props: list,
+        props: List,
+        job_model: JobBase,
 ) -> Generator[Output[Path] | AssetMaterialization | Any, Any, None]:
 
     # https://docs.thinkboxsoftware.com/products/deadline/10.2/1_User%20Manual/manual/manual-submission.html#job-info-file-options
@@ -1313,11 +1325,11 @@ def job_info_file(
 
     job_info_file_str = textwrap.dedent(
         f"""\
-        InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}
+        InitialStatus={job_model.deadline_initial_status}
         BatchName={batch_name}
         Name={job_title_str}
         Frames={frames}
-        ChunkSize={combine_dicts["yaml_submission"]["chunk_size"]}
+        ChunkSize={job_model.chunk_size}
         Plugin=CommandLine
         StartupDirectory=
         """
@@ -1593,6 +1605,15 @@ def job_submission_tree(
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
+        "frame_start_absolute": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_start_absolute"])
+        ),
+        "frame_end_absolute": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_end_absolute"])
+        ),
+        # "job_model": AssetIn(
+        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
+        # ),
     }
 )
 def job_draft_png(
@@ -1605,6 +1626,9 @@ def job_draft_png(
         resolution_draft: tuple,
         annotations_string: str,
         CONFIG: DefaultConstants,
+        frame_start_absolute: int,
+        frame_end_absolute: int,
+        # job_model: JobBase,
 ) -> Generator[Output[dict[str, str]] | AssetMaterialization | Any, Any, None]:
     """
     The QuickDraft PNG Job
@@ -1613,9 +1637,7 @@ def job_draft_png(
     :return:
     """
 
-    frame_start_absolute = combine_dicts["yaml_submission"]["frame_start"]
-    frame_end_absolute = combine_dicts["yaml_submission"]["frame_end"]
-    job_title = combine_dicts["yaml_submission"]["job_title"]
+    job_title =  combine_dicts["yaml_submission"]["job_title"]
 
     quick_type = "createImages"
     codec = "png"
