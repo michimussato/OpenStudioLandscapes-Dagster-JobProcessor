@@ -523,10 +523,10 @@ def annotations_string(
 
     handles = job_model.handles
 
-    fps = job_model.fps
-
-    fi = job_model.cut_in
-    fo = job_model.cut_in
+    # fps = job_model.fps
+    #
+    # fi = job_model.cut_in
+    # fo = job_model.cut_out
 
     fi_kitsu = 0
     fo_kitsu = 0
@@ -535,7 +535,7 @@ def annotations_string(
             fi_kitsu = get_kitsu_task_dict.get("entity", {}).get("data", {}).get("frame_in", 0)
             fo_kitsu = get_kitsu_task_dict.get("entity", {}).get("data", {}).get("frame_out", 0)
 
-    fi_fo = (fi, fo)
+    # fi_fo = (fi, fo)
 
     entity_name = get_entity_name(get_kitsu_task_dict)
     task_name = get_task_name(get_kitsu_task_dict)
@@ -569,7 +569,7 @@ def annotations_string(
             "type": ""
         },
         "SouthCenter": {
-            "text": f"{handles}_{str(fi_fo[0]).zfill(CONFIG.PADDING)}||{handles}_{str(job_model.cut_in).zfill(CONFIG.PADDING)}|$frame|{str(job_model.cut_out).zfill(CONFIG.PADDING)}_{handles}||{str(fi_fo[1]).zfill(CONFIG.PADDING)}_{handles} @{fps}",
+            "text": f"{handles}_{str(job_model.cut_in).zfill(CONFIG.PADDING)}||{handles}_{str(job_model.cut_in).zfill(CONFIG.PADDING)}|$frame|{str(job_model.cut_out).zfill(CONFIG.PADDING)}_{handles}||{str(job_model.cut_out).zfill(CONFIG.PADDING)}_{handles} @{job_model.fps}",
             "colorR": rgb,
             "colorG": rgb,
             "colorB": rgb,
