@@ -2041,28 +2041,54 @@ def job_draft_png(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "combine_dicts": AssetIn(),
-        "render_output_directory": AssetIn(),
-        "render_output_filename": AssetIn(),
-        "batch_name": AssetIn(),
-        "job_title_str": AssetIn(),
-        "resolution_draft": AssetIn(),
-        "annotations_string": AssetIn(),
+        "render_output_directory": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"]),
+        ),
+        "render_output_filename": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_filename"]),
+        ),
+        "batch_name": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "batch_name"]),
+        ),
+        "job_title_str": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_title_str"]),
+        ),
+        "resolution_draft": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "resolution_draft"]),
+        ),
+        "annotations_string": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "annotations_string"]),
+        ),
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
+        ),
+        "frame_start_absolute": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_start_absolute"])
+        ),
+        "frame_end_absolute": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_end_absolute"])
+        ),
+        "job_model": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
+        ),
+        "fps": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "fps"])
         ),
     }
 )
 def job_draft_mov(
         context: AssetExecutionContext,
-        combine_dicts: dict,
         render_output_directory: pathlib.Path,
-        render_output_filename: dict,
+        render_output_filename: Dict,
         batch_name: str,
         job_title_str: str,
         resolution_draft: tuple,
         annotations_string: str,
         CONFIG: DefaultConstants,
+        frame_start_absolute: int,
+        frame_end_absolute: int,
+        job_model: JobBase,
+        fps: float,
 ) -> Generator[Output[dict[str, str]] | AssetMaterialization | Any, Any, None]:
     """
     The QuickDraft MOV Job
@@ -2070,10 +2096,6 @@ def job_draft_mov(
     :param parents:
     :return:
     """
-
-    frame_start_absolute = combine_dicts["yaml_submission"]["frame_start"]
-    frame_end_absolute = combine_dicts["yaml_submission"]["frame_end"]
-    job_title = combine_dicts["yaml_submission"]["job_title"]
 
     quick_type = "createMovie"
     extension = "mov"
@@ -2093,8 +2115,8 @@ def job_draft_mov(
         ChunkSize=1000000
         Plugin=DraftPlugin
         OutputDirectory0={draft_out_dir}
-        OutputFilename0={render_output_filename["padding_deadline"]}
-        InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}
+        OutputFilename0={job_model.plugin_model.padding_deadline}
+        InitialStatus={job_model.deadline_initial_status}
         """
     )
 
@@ -2122,7 +2144,7 @@ def job_draft_mov(
         ScriptArg14=endFrame={frame_end_absolute}
         ScriptArg15=taskStartFrame=={frame_start_absolute}
         ScriptArg16=taskEndFrame=={frame_end_absolute}
-        ScriptArg17=frameRate={combine_dicts["entity"]["data"]["fps"]}
+        ScriptArg17=frameRate={fps}
         ScriptArg18=outFolder="{draft_out_dir}"
         ScriptArg19=outFile="{draft_out_dir}/{job_title}.{extension}"
         ScriptArg20=inFile="{pathlib.Path(render_output_directory/ "raw" / render_output_filename["padding_deadline"]).as_posix()}"
