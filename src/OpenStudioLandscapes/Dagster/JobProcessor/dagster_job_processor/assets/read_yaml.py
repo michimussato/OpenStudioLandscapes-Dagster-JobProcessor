@@ -1766,9 +1766,12 @@ def render_arguments(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "render_output_directory": AssetIn(),
-        "combine_dicts": AssetIn(),
-        "render_arguments": AssetIn(),
+        "render_output_directory": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"])
+        ),
+        "render_arguments": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_arguments"])
+        ),
         "job_model": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
         ),
@@ -1777,7 +1780,6 @@ def render_arguments(
 def plugin_info_file(
         context: AssetExecutionContext,
         render_output_directory: pathlib.Path,
-        combine_dicts: dict,
         render_arguments: str,
         job_model: JobBase,
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization | Any, Any, None]:
@@ -1786,7 +1788,6 @@ def plugin_info_file(
     render_output_directory.mkdir(parents=True, exist_ok=True)
     path = pathlib.Path(f"{render_output_directory}/plugin_info.txt")
     with open(path, "w") as job_info_file:
-        # job_info_file.write(f'Executable={combine_dicts["yaml_submission"]["plugin_dict"]["submitter"]["executable"]}\n')
         job_info_file.write(f'Executable={job_model.plugin_model.executable.as_posix()}\n')
         job_info_file.write(f'Arguments="{render_arguments}"\n')
 
