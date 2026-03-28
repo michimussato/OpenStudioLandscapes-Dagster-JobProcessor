@@ -655,12 +655,319 @@ def combine_dicts(
     read_job_py.update({"fps": fps})
     read_job_py.update({"output_format": output_format})
 
+    """
+      "yaml_submission": {
+        "append_draft_job_mov": true,
+        "append_draft_job_png": true,
+        "chunk_size": 1,
+        "comment": "This is a new Bender job comment",
+        "cut_in": 1001,
+        "cut_out": 1100,
+        "deadline_initial_status": "Active",
+        "deadline_job_with_draft": true,
+        "fps": 25,
+        "frame_end": 1104,
+        "frame_start": 997,
+        "handles": 4,
+        "job_file": "/data/share/AWSPortalRoot1/fixtures/blender/sh030_001.blend",
+        "job_title": "sh030_001",
+        "kitsu_task": "b0cfdac7-afa9-4382-a75d-3c80a388e136",
+        "output_format": "exr",
+        "plugin_file": null,
+        "plugin_model": {
+          "args": [],
+          "executable": null,
+          "output_formats_plugin": [
+            "png",
+            "exr",
+            "jpg"
+          ],
+          "padding_command": "'#' * EVAL_PADDING",
+          "padding_deadline": "'#' * EVAL_PADDING"
+        },
+        "render_version_directory": "/data/share/AWSPortalRoot1/out/Test Production/Shot/SH030/No Task Name",
+        "resolution": [
+          1920,
+          1080
+        ],
+        "resolution_draft_scale": 0.5,
+        "show_name": "Test Production",
+        "task_name": "No Task Name",
+        "with_kitsu_publish": true
+      }
+    """
+
     get_kitsu_task_dict["yaml_submission"] = read_job_py
     get_kitsu_task_dict["job_dict_template"] = CONFIG.JOB_DICT_TEMPLATE
     get_kitsu_task_dict["task_url"] = get_task_url
     get_kitsu_task_dict["deadline_job_submitted"] = False
     get_kitsu_task_dict["deadline_job_queued"] = False
     get_kitsu_task_dict["deadline_job_submitted_result"] = None
+
+    """
+    {
+      "assignees": [],
+      "assigner": {
+        "active": true,
+        "archived": false,
+        "contract_type": "open-ended",
+        "created_at": "2026-01-13T02:08:10",
+        "daily_salary": 0,
+        "data": null,
+        "departments": [],
+        "desktop_login": "",
+        "email": "admin@example.com",
+        "email_otp_enabled": false,
+        "expiration_date": null,
+        "fido_enabled": false,
+        "first_name": "Super",
+        "full_name": "Super Admin",
+        "has_avatar": false,
+        "id": "108d7c11-b47b-4c4b-9fa2-f955e095d1b8",
+        "is_bot": false,
+        "is_generated_from_ldap": false,
+        "last_login_failed": null,
+        "last_name": "Admin",
+        "last_presence": null,
+        "ldap_uid": null,
+        "locale": "en_US",
+        "login_failed_attemps": 0,
+        "notifications_discord_enabled": false,
+        "notifications_discord_userid": "",
+        "notifications_enabled": false,
+        "notifications_mattermost_enabled": false,
+        "notifications_mattermost_userid": "",
+        "notifications_slack_enabled": false,
+        "notifications_slack_userid": "",
+        "phone": "",
+        "position": "artist",
+        "preferred_two_factor_authentication": null,
+        "role": "admin",
+        "seniority": "mid",
+        "shotgun_id": null,
+        "studio_id": null,
+        "timezone": "Europe/Paris",
+        "totp_enabled": false,
+        "type": "Person",
+        "updated_at": "2026-01-13T02:08:10"
+      },
+      "assigner_id": "108d7c11-b47b-4c4b-9fa2-f955e095d1b8",
+      "completion_rate": 0,
+      "created_at": "2026-03-14T22:38:44",
+      "data": null,
+      "deadline_job_queued": false,
+      "deadline_job_submitted": false,
+      "deadline_job_submitted_result": null,
+      "description": null,
+      "difficulty": 3,
+      "done_date": null,
+      "due_date": null,
+      "duration": 0,
+      "end_date": null,
+      "entity": {
+        "canceled": false,
+        "code": null,
+        "created_at": "2026-03-14T22:38:44",
+        "created_by": "108d7c11-b47b-4c4b-9fa2-f955e095d1b8",
+        "data": {
+          "fps": 25,
+          "frame_in": 1201,
+          "frame_out": 1250,
+          "max_retakes": null,
+          "resolution": "960x540"
+        },
+        "description": null,
+        "entity_type_id": "6b85fb0f-a152-412e-b828-0a2c030b1393",
+        "id": "89bcad46-1be7-4095-a5db-edeac55c04ab",
+        "is_casting_standby": false,
+        "is_shared": false,
+        "name": "SH030",
+        "nb_entities_out": 0,
+        "nb_frames": 50,
+        "parent_id": "dc80cc66-b934-4fe8-8bb3-cc90bf0a2348",
+        "preview_file_id": "a8bad4a4-3d67-4350-8755-bf7976c80831",
+        "project_id": "3ede4117-b73c-4bd3-83a2-40d66bc954c5",
+        "ready_for": null,
+        "shotgun_id": null,
+        "source_id": null,
+        "status": "running",
+        "type": "Entity",
+        "updated_at": "2026-03-23T09:43:42"
+      },
+      "entity_id": "89bcad46-1be7-4095-a5db-edeac55c04ab",
+      "entity_type": {
+        "archived": false,
+        "created_at": "2026-01-13T02:07:57",
+        "description": null,
+        "id": "6b85fb0f-a152-412e-b828-0a2c030b1393",
+        "name": "Shot",
+        "short_name": null,
+        "type": "EntityType",
+        "updated_at": "2026-01-13T02:07:57"
+      },
+      "estimation": 0,
+      "id": "b0cfdac7-afa9-4382-a75d-3c80a388e136",
+      "is_subscribed": false,
+      "job_dict_template": {
+        "AuxiliaryFiles": [],
+        "JobDependencies": null,
+        "JobInfoFilePath": "",
+        "PluginInfoFilePath": ""
+      },
+      "last_comment_date": "2026-03-27T10:58:54",
+      "last_preview_file_id": "d9190fae-6f3a-4cef-bd3e-bfdc6773a5e1",
+      "name": "main",
+      "nb_assets_ready": 0,
+      "nb_drawings": 0,
+      "persons": [],
+      "priority": 0,
+      "project": {
+        "code": null,
+        "created_at": "2026-03-14T22:37:01",
+        "data": null,
+        "default_preview_background_file_id": null,
+        "description": null,
+        "end_date": "2027-04-30",
+        "episode_span": 0,
+        "file_tree": null,
+        "fps": "25",
+        "from_schedule_version_id": null,
+        "has_avatar": false,
+        "hd_bitrate_compression": 28,
+        "homepage": "assets",
+        "id": "3ede4117-b73c-4bd3-83a2-40d66bc954c5",
+        "is_clients_isolated": false,
+        "is_preview_download_allowed": false,
+        "is_publish_default_for_artists": false,
+        "is_set_preview_automated": false,
+        "ld_bitrate_compression": 6,
+        "man_days": null,
+        "max_retakes": 0,
+        "name": "Test Production",
+        "nb_episodes": 0,
+        "production_style": "2d3d",
+        "production_type": "shots",
+        "project_status_id": "9acbb6bf-2758-4abf-a87f-316399de5b3b",
+        "ratio": "16:9",
+        "resolution": "960x540",
+        "shotgun_id": null,
+        "start_date": "2026-03-13",
+        "type": "Project",
+        "updated_at": "2026-03-14T22:37:02"
+      },
+      "project_id": "3ede4117-b73c-4bd3-83a2-40d66bc954c5",
+      "real_start_date": "2026-03-14T22:39:28",
+      "retake_count": 1,
+      "sequence": {
+        "canceled": false,
+        "code": null,
+        "created_at": "2026-03-14T22:37:39",
+        "created_by": "108d7c11-b47b-4c4b-9fa2-f955e095d1b8",
+        "data": {},
+        "description": "",
+        "entity_type_id": "b9d90a79-7ca1-4e50-806b-41055a7a6f84",
+        "id": "dc80cc66-b934-4fe8-8bb3-cc90bf0a2348",
+        "is_casting_standby": false,
+        "is_shared": false,
+        "name": "SQ010",
+        "nb_entities_out": 0,
+        "nb_frames": null,
+        "parent_id": null,
+        "preview_file_id": null,
+        "project_id": "3ede4117-b73c-4bd3-83a2-40d66bc954c5",
+        "ready_for": null,
+        "shotgun_id": null,
+        "source_id": null,
+        "status": "running",
+        "type": "Sequence",
+        "updated_at": "2026-03-14T22:37:39"
+      },
+      "shotgun_id": null,
+      "sort_order": 0,
+      "start_date": null,
+      "task_status": {
+        "archived": false,
+        "color": "#ff3860",
+        "created_at": "2026-01-13T02:07:58",
+        "description": null,
+        "for_concept": false,
+        "id": "cb900a6e-06ea-42d1-885a-b742e686f312",
+        "is_artist_allowed": true,
+        "is_client_allowed": true,
+        "is_default": false,
+        "is_done": false,
+        "is_feedback_request": false,
+        "is_retake": true,
+        "is_wip": false,
+        "name": "Retake",
+        "priority": 1,
+        "short_name": "retake",
+        "shotgun_id": null,
+        "type": "TaskStatus",
+        "updated_at": "2026-01-13T02:07:58"
+      },
+      "task_status_id": "cb900a6e-06ea-42d1-885a-b742e686f312",
+      "task_type": {
+        "allow_timelog": true,
+        "archived": false,
+        "color": "#F06292",
+        "created_at": "2026-01-13T02:07:58",
+        "department_id": "9cf1aa43-06f5-4e9a-a51a-2b1fd3ed3c2f",
+        "description": null,
+        "for_entity": "Shot",
+        "id": "859d37ac-24e1-4fba-91a9-5c0479a11766",
+        "name": "Rendering",
+        "priority": 6,
+        "short_name": "",
+        "shotgun_id": null,
+        "type": "TaskType",
+        "updated_at": "2026-01-13T02:07:58"
+      },
+      "task_type_id": "859d37ac-24e1-4fba-91a9-5c0479a11766",
+      "task_url": "http://10.1.2.15:4545/productions/3ede4117-b73c-4bd3-83a2-40d66bc954c5/shots/tasks/b0cfdac7-afa9-4382-a75d-3c80a388e136/",
+      "type": "Task",
+      "updated_at": "2026-03-27T10:59:10",
+      "yaml_submission": {
+        "append_draft_job_mov": true,
+        "append_draft_job_png": true,
+        "chunk_size": 1,
+        "comment": "This is a new Bender job comment",
+        "cut_in": 1001,
+        "cut_out": 1100,
+        "deadline_initial_status": "Active",
+        "deadline_job_with_draft": true,
+        "fps": 25,
+        "frame_end": 1104,
+        "frame_start": 997,
+        "handles": 4,
+        "job_file": "/data/share/AWSPortalRoot1/fixtures/blender/sh030_001.blend",
+        "job_title": "sh030_001",
+        "kitsu_task": "b0cfdac7-afa9-4382-a75d-3c80a388e136",
+        "output_format": "exr",
+        "plugin_file": null,
+        "plugin_model": {
+          "args": [],
+          "executable": null,
+          "output_formats_plugin": [
+            "png",
+            "exr",
+            "jpg"
+          ],
+          "padding_command": "'#' * EVAL_PADDING",
+          "padding_deadline": "'#' * EVAL_PADDING"
+        },
+        "render_version_directory": "/data/share/AWSPortalRoot1/out/Test Production/Shot/SH030/No Task Name",
+        "resolution": [
+          1920,
+          1080
+        ],
+        "resolution_draft_scale": 0.5,
+        "show_name": "Test Production",
+        "task_name": "No Task Name",
+        "with_kitsu_publish": true
+      }
+    }
+    """
 
     yield Output(get_kitsu_task_dict)
 
@@ -1601,13 +1908,28 @@ def job_submission_tree(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "combine_dicts": AssetIn(),
-        "render_output_directory": AssetIn(),
-        "render_output_filename": AssetIn(),
-        "batch_name": AssetIn(),
-        "job_title_str": AssetIn(),
-        "resolution_draft": AssetIn(),
-        "annotations_string": AssetIn(),
+        # "combine_dicts": AssetIn(),
+        "render_output_directory": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"])
+        ),
+        "render_output_filename": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_filename"])
+        ),
+        "batch_name": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "batch_name"])
+        ),
+        "job_title_str": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_title_str"])
+        ),
+        "job_title": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_title"])
+        ),
+        "resolution_draft": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "resolution_draft"])
+        ),
+        "annotations_string": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "annotations_string"])
+        ),
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
@@ -1617,24 +1939,25 @@ def job_submission_tree(
         "frame_end_absolute": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_end_absolute"])
         ),
-        # "job_model": AssetIn(
-        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
-        # ),
+        "job_model": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
+        ),
     }
 )
 def job_draft_png(
         context: AssetExecutionContext,
-        combine_dicts: dict,
+        # combine_dicts: dict,
         render_output_directory: pathlib.Path,
         render_output_filename: dict,
         batch_name: str,
         job_title_str: str,
+        job_title: str,
         resolution_draft: tuple,
         annotations_string: str,
         CONFIG: DefaultConstants,
         frame_start_absolute: int,
         frame_end_absolute: int,
-        # job_model: JobBase,
+        job_model: JobBase,
 ) -> Generator[Output[dict[str, str]] | AssetMaterialization | Any, Any, None]:
     """
     The QuickDraft PNG Job
@@ -1643,7 +1966,7 @@ def job_draft_png(
     :return:
     """
 
-    job_title =  combine_dicts["yaml_submission"]["job_title"]
+    # job_title =  combine_dicts["yaml_submission"]["job_title"]
 
     quick_type = "createImages"
     codec = "png"
@@ -1662,8 +1985,8 @@ def job_draft_png(
         ChunkSize=1000000
         Plugin=DraftPlugin
         OutputDirectory0={draft_out_dir}
-        OutputFilename0={render_output_filename["padding_deadline"]}
-        InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}
+        OutputFilename0={job_model.plugin_model.padding_deadline}
+        InitialStatus={job_model.deadline_initial_status}
         """
     )
 
