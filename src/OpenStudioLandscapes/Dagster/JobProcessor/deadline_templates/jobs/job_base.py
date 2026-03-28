@@ -1,5 +1,5 @@
 import datetime
-import os
+import pathlib
 import uuid
 import enum
 from typing import Tuple, Union
@@ -47,7 +47,7 @@ class OutputFormats(enum.StrEnum):
 
 class JobBase(BaseModel):
 
-    job_file: os.PathLike = Field(
+    job_file: pathlib.Path = Field(
         default=None,
         description="The file to render",
         examples=[

@@ -548,7 +548,7 @@ def annotations_string(
             "type": ""
         },
         "NorthCenter": {
-            "text": f"{pathlib.Path(job_model.job_file).name}",
+            "text": f"{job_model.job_file.name}",
             "colorR": rgb,
             "colorG": rgb,
             "colorB": rgb,
@@ -1175,7 +1175,7 @@ def job_title(
         job_model: JobBase,
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
 
-    base, first_dot, rest = pathlib.Path(job_model.job_file).name.partition(".")
+    base, first_dot, rest = job_model.job_file.name.partition(".")
 
     yield Output(base)
 
@@ -1283,7 +1283,7 @@ def job_title_str(
             entity_name = f'{entity_name} - {str(job_model.handles)}_{str(job_model.cut_in).zfill(CONFIG.PADDING)}-{str(job_model.cut_out).zfill(CONFIG.PADDING)}_{job_model.handles}'
             # entity_name = f'{self.sequence_name}_{self.entity_name} - {str(self.handles)}_{str(self.frame_start).zfill(self.PADDING)}-{str(self.frame_end).zfill(self.PADDING)}_{self.handles}'
 
-    ret = f'{show_name} - {entity_name} - {task_name} - {pathlib.Path(job_model.job_file).name} - {version} - {pathlib.Path(job_model.plugin_model.executable).name}'
+    ret = f'{show_name} - {entity_name} - {task_name} - {job_model.job_file.name} - {version} - {pathlib.Path(job_model.plugin_model.executable).name}'
 
     yield Output(ret)
 
@@ -2273,33 +2273,59 @@ def resolution(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "combine_dicts": AssetIn(),
-        "render_arguments": AssetIn(),
-        "render_output_directory": AssetIn(),
-        "render_output_filename": AssetIn(),
-        "version": AssetIn(),
-        "batch_name": AssetIn(),
-        "job_title_str": AssetIn(),
+        # "combine_dicts": AssetIn(
+        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "combine_dicts"])
+        # ),
+        "render_arguments": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_arguments"])
+        ),
+        "render_output_directory": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"])
+        ),
+        # "render_output_filename": AssetIn(
+        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_filename"])
+        # ),
+        "version": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "version"])
+        ),
+        "batch_name": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "batch_name"])
+        ),
+        "job_title_str": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_title_str"])
+        ),
+        "job_title": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_title"])
+        ),
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
         "job_model": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
         ),
+        "frame_start_absolute": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_start_absolute"])
+        ),
+        "frame_end_absolute": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_end_absolute"])
+        ),
     }
 )
 def job_kitsu_publish(
         context: AssetExecutionContext,
-        combine_dicts: dict,
+        # combine_dicts: dict,
         render_arguments: str,
         render_output_directory: pathlib.Path,
-        render_output_filename: dict,
+        # render_output_filename: dict,
         version: str,
         batch_name: str,
         job_title_str: str,
+        job_title: str,
         CONFIG: DefaultConstants,
         job_model: JobBase,
-) -> Generator[Output[dict[str, str]] | AssetMaterialization | Any, Any, None]:
+        frame_start_absolute: int,
+        frame_end_absolute: int,
+) -> Generator[Output[Dict[str, str]] | AssetMaterialization | Any, Any, None]:
     """
     The Kitsu-Publish Job
 
@@ -2310,7 +2336,7 @@ def job_kitsu_publish(
     extension = "mov"
 
     handles = job_model.handles
-    job_title = combine_dicts["yaml_submission"]["job_title"]
+    # job_title = combine_dicts["yaml_submission"]["job_title"]
 
     # TODO this is needed to find the movie, but could be more elegant
     draft_out_dir = render_output_directory / "draft" / extension
@@ -2355,18 +2381,18 @@ def job_kitsu_publish(
     #            task-types     List task types.
     #            tasks          List tasks for a project.
     args.extend(['<QUOTE>/data/local/.openstudiolandscapes/.landscapes/.persistent/OpenStudioLandscapes-Deadline-10-2/data/opt/Thinkbox/DeadlineRepository10/custom/events/Kitsu/kitsu_submission_cli.py<QUOTE>'])
-    args.extend(['--task-id', '<QUOTE>{}<QUOTE>'.format(combine_dicts["yaml_submission"]["kitsu_task"])])
+    args.extend(['--task-id', '<QUOTE>{}<QUOTE>'.format(str(job_model.kitsu_task))])
     args.extend(['--comment', f'<QUOTE>'
                               f'Output directory: `{render_output_directory}`<br>'
                               f'Version: `{version}`<br>'
-                              f'Frames: `{handles}_{combine_dicts["yaml_submission"]["frame_start"]}-{combine_dicts["yaml_submission"]["frame_end"]}_{handles}`<br>'
-                              f'Comment: {combine_dicts["yaml_submission"]["comment"]}<br>'
+                              f'Frames: `{handles}_{frame_start_absolute}-{frame_end_absolute}_{handles}`<br>'
+                              f'Comment: {job_model.comment}<br>'
                               f'<br>'
                               f'---<br>'
                               f'<br>'
-                              f'Execution Command: `{combine_dicts["yaml_submission"]["plugin_dict"]["submitter"]["executable"]} {render_arguments}`<br>'
+                              f'Execution Command: `{job_model.plugin_model.executable.as_posix()} {render_arguments}`<br>'
                               f'Submission Command: Todo<br>'
-                              f'Job file: `{combine_dicts["yaml_submission"]["job_file"]}`<br>'
+                              f'Job file: `{job_model.job_file.as_posix()}`<br>'
                               f'<QUOTE>'
                               f''])
     args.extend(['--host', f'<QUOTE>{"http://10.1.2.15:4545/api"}<QUOTE>'])  # Todo: make dynamic
@@ -2385,8 +2411,8 @@ def job_kitsu_publish(
         Priority=0
         ChunkSize=1000000
         OutputDirectory0={draft_out_dir}
-        OutputFilename0={render_output_filename["padding_deadline"]}
-        InitialStatus={combine_dicts["yaml_submission"]["deadline_initial_status"]}
+        OutputFilename0={job_model.plugin_model.padding_deadline}
+        InitialStatus={job_model.deadline_initial_status}
         Plugin=CommandLine
         ForceReloadPlugin=True
         """
