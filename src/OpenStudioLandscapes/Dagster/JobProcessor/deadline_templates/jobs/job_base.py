@@ -55,6 +55,15 @@ class JobBase(BaseModel):
             "/server/scenes/nuke/sh030_001.nk",
         ]
     )
+
+    job_file_yaml: pathlib.Path = Field(
+        default=None,
+        description="The path to the YAML file that was submitted",
+        examples=[
+            "/server/jobs/job.yaml",
+            "/server/jobs/job2.yml",
+        ]
+    )
     plugin_model: Union[
         PluginBlender_4_1_1,
         PluginHoudini_19_5_805,

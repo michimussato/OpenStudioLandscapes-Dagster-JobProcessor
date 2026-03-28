@@ -410,9 +410,13 @@ def read_job_yaml(
         job_dict = yaml.safe_load(fr)
 
     context.log.debug(f"{job_dict = }")
+    context.log.debug(f"{config.filename = }")
 
     job_model: JobBase = JobBase(
         **job_dict
+        **{
+              "job_file_yaml": config.filename,
+          }
     )
 
     context.log.debug(f"{job_model = }")
@@ -1670,24 +1674,24 @@ def job_info_file(
         "render_output_directory": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"])
         ),
-        "combine_dicts": AssetIn(),
-        # "job_model": AssetIn(
-        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
-        # ),
+        # "combine_dicts": AssetIn(),
+        "job_model": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "read_job_yaml"])
+        ),
     }
 )
 def paste_job_py(
         context: AssetExecutionContext,
         render_output_directory: pathlib.Path,
-        combine_dicts: dict,
-        # job_model: JobBase,
+        # combine_dicts: dict,
+        job_model: JobBase,
 ) -> Generator[Output[Path] | AssetMaterialization | Any, Any, None]:
 
-    job_py = pathlib.Path(combine_dicts["yaml_submission"]["job_file_py"])
+    job_yaml = job_model.job_file_yaml
 
-    shutil.move(job_py, render_output_directory)
+    shutil.move(job_yaml, render_output_directory)
 
-    ret = pathlib.Path(render_output_directory) / job_py.name
+    ret = pathlib.Path(render_output_directory) / job_yaml.name
 
     yield Output(ret)
 
