@@ -50,14 +50,19 @@ class JobBase(BaseModel):
     job_file: os.PathLike = Field(
         default=None,
         description="The file to render",
-        examples=["/server/scenes/blender/sh030_001.blend"]
+        examples=[
+            "/server/scenes/blender/sh030_001.blend",
+            "/server/scenes/nuke/sh030_001.nk",
+        ]
     )
     plugin_model: Union[
         PluginBlender_4_1_1,
         PluginNuke_15_0v4,
     ] = Field(
+        # https://docs.pydantic.dev/latest/concepts/unions/#discriminated-unions-with-callable-discriminator
         # default=None,
         description="The plugin model",
+        discriminator="plugin_type",
         # examples=[i.value for i in Plugins],
     )
     plugin_file: os.PathLike = Field(

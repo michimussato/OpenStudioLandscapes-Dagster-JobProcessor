@@ -404,9 +404,9 @@ def read_job_yaml(
         config: IngestJobConfig,
 ) -> Generator[Output[JobBase] | AssetMaterialization | Any, Any, None]:
 
-    temp = PluginBlender_4_1_1()
-
-    context.log.debug(yaml.safe_dump(json.loads(temp.model_dump_json(fallback=str, indent=2))))
+    # temp = PluginBlender_4_1_1()
+    #
+    # context.log.debug(yaml.safe_dump(json.loads(temp.model_dump_json(fallback=str, indent=2))))
 
     with open(config.filename) as fr:
         job_dict = yaml.safe_load(fr)
@@ -416,6 +416,8 @@ def read_job_yaml(
     job_model: JobBase = JobBase(
         **job_dict
     )
+
+    context.log.debug(f"{job_model = }")
 
     yield Output(job_model)
 
