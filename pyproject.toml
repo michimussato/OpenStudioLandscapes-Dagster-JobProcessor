@@ -28,10 +28,7 @@ license-files = [
 requires-python = ">=3.11,<3.13"
 dependencies = [
     "dagster==1.9.11",
-#    "dagster-webserver",
     "gazu[cli]",
-#    "OpenImageIO",
-#    "OpenEXR",
     "OpenStudioLandscapes-DagsterCodeLocation-StreamingProcess @ git+https://github.com/michimussato/OpenStudioLandscapes-DagsterCodeLocation-StreamingProcess.git",
 ]
 
@@ -39,6 +36,12 @@ dependencies = [
 optional-base = [
     "OpenStudioLandscapes-Dagster[optional-base] @ git+https://github.com/michimussato/OpenStudioLandscapes-Dagster.git",
     "OpenStudioLandscapes-Deadline-10-2[optional-base] @ git+https://github.com/michimussato/OpenStudioLandscapes-Deadline-10-2.git",
+]
+dev = [
+    "dagster-webserver==1.9.11",
+    "pytest",
+    #"OpenStudioLandscapes @ git+https://github.com/michimussato/OpenStudioLandscapes.git",
+    "OpenStudioLandscapes-DagsterCodeLocation-JobProcessor[optional-base]",
 ]
 
 [project.readme]

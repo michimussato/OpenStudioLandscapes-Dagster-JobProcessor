@@ -11,15 +11,12 @@ from dagster import (
 )
 
 import os
-# import json
 import pathlib
 import shutil
 
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor import settings
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.config.models import DefaultConstants
-# from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.assets.read_yaml import ASSET_HEADER_JOB_PROCESSOR
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.assets.read_yaml import ASSET_HEADER_JOB_PROCESSOR_READER
-# from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.assets.submit_jobs import ASSET_HEADER_JOB_SUBMITTER_DEADLINE
 
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.jobs import ingest_synced_jobs_yaml
 

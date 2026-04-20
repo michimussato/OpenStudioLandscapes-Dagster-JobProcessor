@@ -180,6 +180,9 @@ def get_entity_name(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={},
+    deps=[
+        AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"]),
+    ],
 )
 def CONFIG(
     context: AssetExecutionContext,

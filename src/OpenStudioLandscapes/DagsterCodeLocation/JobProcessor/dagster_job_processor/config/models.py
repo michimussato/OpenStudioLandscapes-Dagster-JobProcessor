@@ -110,9 +110,13 @@ class DefaultConstants(BaseModel):
         description="The subfolder where the EXR images with extra "
                     "metadata will go."
     )
-    OIIO_PNG: str = Field(
+    OIIO_RAW_TO_PNG: str = Field(
         default="oiio_png",
         description="The subfolder where the PNG images will go."
+    )
+    OIIO_PNG_TO_MOV: str = Field(
+        default="oiio_mov",
+        description="The subfolder where the MOV will go."
     )
 
 
