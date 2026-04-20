@@ -13,7 +13,7 @@ from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor
 )
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.sensors import (
     # submission_sensor,
-    my_custom_auto_materialize_sensor,
+    shot_processor_auto_materialize_sensor,
     ingestion_sensor_yaml,
 )
 
@@ -29,7 +29,7 @@ submit_jobs_assets = load_assets_from_modules([submit_jobs])
 all_sensors = [
     # submission_sensor,
     ingestion_sensor_yaml,
-    my_custom_auto_materialize_sensor,
+    shot_processor_auto_materialize_sensor,
 ]
 
 
