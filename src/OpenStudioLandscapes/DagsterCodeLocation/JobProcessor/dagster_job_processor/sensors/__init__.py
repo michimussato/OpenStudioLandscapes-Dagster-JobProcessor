@@ -219,9 +219,9 @@ def ingestion_sensor_yaml(
 
 # Custom AutoMaterialize Sensor
 # https://docs.dagster.io/concepts/assets/asset-auto-execution#auto-materialize-sensors
-shot_processor_auto_materialize_sensor = AutomationConditionSensorDefinition(
+job_processor_auto_materialize_sensor = AutomationConditionSensorDefinition(
     "JobProcessor_AutoMaterializeSensor",
-    target=AssetSelection.all(include_sources=True),
+    target=AssetSelection.all(include_sources=True),  # Todo: include_sources=True correct?
     minimum_interval_seconds=15,
     default_status=settings.SENSORS_STATUS,
 )
