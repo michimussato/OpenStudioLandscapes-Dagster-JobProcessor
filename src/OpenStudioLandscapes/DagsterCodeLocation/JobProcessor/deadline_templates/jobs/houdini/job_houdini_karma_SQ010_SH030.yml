@@ -8,7 +8,7 @@ deadline_config:
   rest_api: http://miniboss:8899/api/
   user: michael
   host: lenovo
-usd_input: /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.hip
+usd_input: /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
 job_priority: 60
 plugin_model:
   plugin_type: PluginHoudiniKarma_19_5_805
