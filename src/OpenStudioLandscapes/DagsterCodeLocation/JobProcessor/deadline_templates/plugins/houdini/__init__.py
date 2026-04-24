@@ -12,8 +12,8 @@ from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.pl
 
 
 class RenderEngine(enum.StrEnum):
-    MANTRA = "CYCLES"
-    KARMA = "KARMA"
+    MANTRA = "MANTRA"
+    KARMA = "BRAY_HdKarma"
 
 
 # - Mantra
@@ -477,6 +477,10 @@ class PluginHoudiniKarmaBase(PluginBase):
     #     description="Disable scene lights. This applies to "
     #                 "all render delegates.",
     # )
+
+    renderer: Renderer = Field(
+        default=RenderEngine.KARMA.value,
+    )
 
     complexity: Union[int, Complexity] = Field(
         default=Complexity.veryhigh.value,
