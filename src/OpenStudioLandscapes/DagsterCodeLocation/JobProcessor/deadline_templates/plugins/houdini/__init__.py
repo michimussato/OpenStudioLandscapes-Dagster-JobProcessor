@@ -89,7 +89,9 @@ class PluginHoudiniKarmaBase(PluginBase):
 
     args: List = [
         "--verbose", "{verbosity}",
+        "--make-output-path",
         "--settings", "{settings}",
+        "--renderer", "{renderer}",
         "--purpose", "{purpose}",
         # "--frame", "{cut_in}",
         "--frame", "<STARTFRAME>",

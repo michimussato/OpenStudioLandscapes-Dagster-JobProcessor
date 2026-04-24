@@ -13,6 +13,7 @@ job_priority: 60
 plugin_model:
   plugin_type: PluginHoudiniKarma_19_5_805
   settings: /Render/rendersettings
+  renderer: BRAY_HdKarma
 #  usd_input: /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
   # rop: /stage/usdrender_rop_camera2
 deadline_initial_status: Active
