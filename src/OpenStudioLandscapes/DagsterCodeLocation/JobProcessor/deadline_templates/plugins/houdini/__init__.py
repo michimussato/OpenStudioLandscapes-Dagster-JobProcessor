@@ -97,9 +97,9 @@ class PluginHoudiniKarmaBase(PluginBase):
         "--frame-count", str(1),
         # "--frame-inc", "{frame_inc}",
         "--fps", "{fps}",
-        "--usd-input", "<QUOTE>'{job_file}'<QUOTE>",
+        "--usd-input", "<QUOTE>{job_file}<QUOTE>",
         "--complexity", "{complexity}",
-        "--output", "<QUOTE>'{render_output}'<QUOTE>",
+        "--output", "<QUOTE>{render_output}<QUOTE>",
 
         # "--render-format", "{output_format}",
         # # "--use-extension", "{use_extension}",
@@ -455,9 +455,9 @@ class PluginHoudiniKarmaBase(PluginBase):
     #     description="Override the frames per second defined on the stage.",
     # )
 
-    usd_input: pathlib.Path = Field(
-        description="The USD file for the scene",
-    )
+    # usd_input: pathlib.Path = Field(
+    #     description="The USD file for the scene",
+    # )
 
     # disable_motion_blur: bool = Field(
     #     default=False,
