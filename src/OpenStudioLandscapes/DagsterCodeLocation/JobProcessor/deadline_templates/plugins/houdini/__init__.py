@@ -1,7 +1,5 @@
 import enum
-import pathlib
 import textwrap
-# from ssl import Purpose
 from typing import List, Union
 
 from pydantic import field_validator
@@ -99,9 +97,9 @@ class PluginHoudiniKarmaBase(PluginBase):
         "--frame-count", str(1),
         # "--frame-inc", "{frame_inc}",
         "--fps", "{fps}",
-        "--usd-input", "<QUOTE>{job_file}<QUOTE>",
+        "--usd-input", "<QUOTE>'{job_file}'<QUOTE>",
         "--complexity", "{complexity}",
-        "--output", "<QUOTE>{render_output}<QUOTE>",
+        "--output", "<QUOTE>'{render_output}'<QUOTE>",
 
         # "--render-format", "{output_format}",
         # # "--use-extension", "{use_extension}",
@@ -494,10 +492,7 @@ class PluginHoudiniKarmaBase(PluginBase):
     )
 
     purpose: List[Purpose] = Field(
-        default=[
-            Purpose.geometry.value,
-            Purpose.render.value,
-        ],
+        default=f"{Purpose.geometry.value},{Purpose.render.value}",
         description=textwrap.dedent(
             """
             --purpose arg (=geometry,render)      Specify the purpose for rendering.  
@@ -508,10 +503,10 @@ class PluginHoudiniKarmaBase(PluginBase):
         )
     )
 
-    @field_validator("purpose")
-    @classmethod
-    def concat_purpose(cls, v: List[Purpose]) -> str:
-        return ",".join(v)
+    # @field_validator("purpose")
+    # @classmethod
+    # def concat_purpose(cls, v: List[Purpose]) -> str:
+    #     return ",".join(v)
 
     settings: str = Field(
         # default="/Render/rendersettings",

@@ -13,19 +13,19 @@ from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.pl
 class PluginHoudini_19_5_805(PluginHoudiniBase):
     plugin_type: Literal['PluginHoudini_19_5_805']
 
-    executable: pathlib.Path = REZ_PACKAGES /  "houdini" / "19.5.805" / "hrender"
-
     # Farm command:
-    # Executable=/nfs/rez-packages/wrappers/hython-19.5.805
-    # Arguments="/nfs/deadline/DeadlineRepository10/plugins/Houdini/hrender_dl.py -e -f <STARTFRAME> <ENDFRAME> 1 -d /stage/usdrender_rop_camera2 -o <QUOTE>/nfs/AWSPortalRoot1/out/Sandbox/Shot/SQ010_SH020/Layout/018/4_0997-1024_4/vivi_025.\$F4.exr<QUOTE> <QUOTE>/nfs/AWSPortalRoot1/fixtures/houdini/project/vivi_025.hip<QUOTE>"
-    # Arguments="/nfs/deadline/DeadlineRepository10/plugins/Houdini/hrender_dl.py -e -f <STARTFRAME> <ENDFRAME> 1 -d /stage/usdrender_rop_camera2 -o <QUOTE>/nfs/AWSPortalRoot1/out/Sandbox/Shot/SQ010_SH020/Layout/018/4_0997-1024_4/vivi_025.\$F4.exr<QUOTE> <QUOTE>/data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.hip<QUOTE>"
+    # - husk --settings /Render/rendersettings --make-output-path --frame 1021 --frame-count 1 --frame-inc 1 --renderer BRAY_HdKarma --purpose geometry,render --complexity veryhigh --snapshot 300 --output /data/share/AWSPortalRoot1/hello1.\$F4.exr --verbose CeT9 --usd-input /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
+    # - /data/share/rez-packages/packages/houdini/19.5.805/husk --settings /Render/rendersettings --make-output-path --frame 1021 --frame-count 1 --frame-inc 1 --renderer BRAY_HdKarma --purpose geometry,render --complexity veryhigh --snapshot 300 --output /data/share/AWSPortalRoot1/hello1.\$F4.exr --verbose ce9 --usd-input /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
+    # - husk --settings /Render/rendersettings --make-output-path --frame 1021 --frame-count 1 --frame-inc 1 --renderer BRAY_HdKarma --purpose geometry,render --complexity veryhigh --snapshot 300 --output /data/share/AWSPortalRoot1/hello1.\$F4.exr --verbose CeT9 /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
+    #
+    # -
+    # - [OK] /data/share/rez-packages/packages/houdini/19.5.805/husk --settings /Render/rendersettings --make-output-path --frame 1021 --frame-count 10 --frame-inc 1 --renderer BRAY_HdKarma --purpose geometry,render --complexity veryhigh --snapshot 300 --output \"/data/share/AWSPortalRoot1/out/Test Production/Shot/SH040/Rendering/002/raw/vivi_025.\\\$F4.exr\" --verbose ce9 --usd-input /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
 
-    # https://deborahrfowler.com/HoudiniResources/Overview-CommandLineRenderingMantraRedshift.html
-    # /data/share/rez-packages/packages/houdini/19.5.805/hython /data/local/.openstudiolandscapes/.landscapes/.persistent/OpenStudioLandscapes-Deadline-10-2/data/opt/Thinkbox/DeadlineRepository10/plugins/Houdini/hrender_dl.py -e -f 1001 1001 1 -v -d "/stage/usdrender_rop_camera2" -o "/data/share/AWSPortalRoot1/test/vivi_025.$F4.exr" "/data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.hip"
-    # /data/share/rez-packages/packages/houdini/19.5.805/hython /data/local/.openstudiolandscapes/.landscapes/.persistent/OpenStudioLandscapes-Deadline-10-2/data/opt/Thinkbox/DeadlineRepository10/plugins/Houdini/hrender_dl.py -e -f 1001 1002 1 -v -d "/stage/usdrender_rop_camera2" -o '/data/share/AWSPortalRoot1/test/vivi_025.\$F4.exr' '/data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.hip'
-    # /data/share/rez-packages/packages/houdini/19.5.805/hython /data/local/.openstudiolandscapes/.landscapes/.persistent/OpenStudioLandscapes-Deadline-10-2/data/opt/Thinkbox/DeadlineRepository10/plugins/Houdini/hrender_dl.py -e -f 1001 1001 1 -v -d "/stage/usdrender_rop_camera2" -o '/data/share/AWSPortalRoot1/test/vivi_025.\$F4.exr' '/data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.hip'
+    # Not working
+    # - /data/share/rez-packages/packages/houdini/19.5.805/husk --verbose ce9 --make-output-path --settings /Render/rendersettings --renderer BRAY_HdKarma --purpose ['geometry', 'render'] --frame 1006 --frame-count 1 --fps 25.0 --usd-input /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda --complexity veryhigh --output /data/share/AWSPortalRoot1/out/Test Production/Shot/SH040/Rendering/002/raw/vivi_025.\$F4.exr
+    # - /data/share/rez-packages/packages/houdini/19.5.805/husk --settings /Render/rendersettings --make-output-path --frame 1021 --frame-count 1 --frame-inc 1 --renderer BRAY_HdKarma --purpose geometry,render --complexity veryhigh --snapshot 300 --output "/data/share/AWSPortalRoot1/out/Test\ Production/Shot/SH040/Rendering/002/raw/vivi_025.$F4.exr" --verbose ce9 --usd-input /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
 
-    # /data/share/tools/houdini-19.5.805-linux_x86_64_gcc9.3# hrender -v -e -f 1001 1002 -i 1 -d /stage/usdrender_rop_camera2 /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.hip
+    executable: pathlib.Path = REZ_PACKAGES /  "houdini" / "19.5.805" / "hrender"
 
     rop: str = Field(
         default="",
