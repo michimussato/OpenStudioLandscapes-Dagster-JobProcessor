@@ -97,9 +97,9 @@ class PluginHoudiniKarmaBase(PluginBase):
         "--frame-count", str(1),
         # "--frame-inc", "{frame_inc}",
         "--fps", "{fps}",
-        "--usd-input", "{usd_input}",
+        "--usd-input", "<QUOTE>'{job_file}'<QUOTE>",
         "--complexity", "{complexity}",
-        "--output", "{output}",
+        "--output", "<QUOTE>'{render_output}'<QUOTE>",
 
         # "--render-format", "{output_format}",
         # # "--use-extension", "{use_extension}",
