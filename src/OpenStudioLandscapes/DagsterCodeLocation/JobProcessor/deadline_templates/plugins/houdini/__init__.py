@@ -491,7 +491,7 @@ class PluginHoudiniKarmaBase(PluginBase):
         )
     )
 
-    purpose: List[Purpose] = Field(
+    purpose: str = Field(
         default=f"{Purpose.geometry.value},{Purpose.render.value}",
         description=textwrap.dedent(
             """
