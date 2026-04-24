@@ -264,7 +264,10 @@ def get_kitsu_task_dict(
     # TODO: make fail safe
 
     task_id = job_model.kitsu_task
-    task_dict = kitsu_resource.get_kitsu_task_dict(task_id=str(task_id))
+    task_dict = kitsu_resource.get_kitsu_task_dict(
+        context=context,
+        task_id=str(task_id),
+    )
 
     yield Output(task_dict)
 

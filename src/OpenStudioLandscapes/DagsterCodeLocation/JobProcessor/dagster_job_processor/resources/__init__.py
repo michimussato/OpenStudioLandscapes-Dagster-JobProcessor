@@ -1,15 +1,17 @@
+from typing import Union
+
 import gazu
 import requests
-from dagster import ConfigurableResource
+from dagster import ConfigurableResource, OpExecutionContext, AssetExecutionContext
 from pydantic import Field
 
 
 # Resources
 class KitsuResourceBase(ConfigurableResource):
-    def get_kitsu_task_dict(self, _) -> dict:
+    def get_kitsu_task_dict(self, **kwargs) -> dict:
         raise NotImplementedError()
 
-    def get_task_url(self, _) -> dict:
+    def get_task_url(self, **kwargs) -> dict:
         raise NotImplementedError()
 
 
@@ -27,7 +29,11 @@ class KitsuResource(KitsuResourceBase):
         default="mysecretpassword",
     )
 
-    def get_kitsu_task_dict(self, task_id: str) -> dict:
+    def get_kitsu_task_dict(
+            self,
+            task_id: str,
+            context: Union[AssetExecutionContext, OpExecutionContext],
+    ) -> dict:
         gazu.client.set_host(self.host)
         try:
             gazu.log_in(
@@ -41,6 +47,14 @@ class KitsuResource(KitsuResourceBase):
                     'error': str(e)
                 }
             }
+            context.log.error(e)
+        except gazu.exception.RouteNotFoundException as e:
+            task_dict = {
+                'kitsu_task_dict': {
+                    'error': str(e)
+                }
+            }
+            context.log.error(e)
         return task_dict
 
     def get_task_url(self, task_dict: dict) -> str:
