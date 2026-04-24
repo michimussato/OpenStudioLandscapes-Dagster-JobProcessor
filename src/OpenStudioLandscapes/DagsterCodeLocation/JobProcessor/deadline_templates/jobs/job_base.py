@@ -181,12 +181,12 @@ class JobBase(BaseModel):
         description="The initial job status after submission",
         examples=[i.name for i in OutputFormats],
     )
-    append_draft_job_png: bool = Field(
-        default=False,
-    )
-    append_draft_job_mov: bool = Field(
-        default=False,
-    )
+    # append_draft_job_png: bool = Field(
+    #     default=False,
+    # )
+    # append_draft_job_mov: bool = Field(
+    #     default=False,
+    # )
     # with_kitsu_publish: bool = Field(
     #     default=False,
     # )
@@ -205,11 +205,11 @@ class JobBase(BaseModel):
         default=1100,
         description="The cut out",
     )
-    # resolution_draft_scale: PositiveFloat = Field(
-    resolution_draft_scale: float = Field(
-        default=0.5,
-        description="Scale factor for the draft jobs",
-    )
+    # # resolution_draft_scale: PositiveFloat = Field(
+    # resolution_draft_scale: float = Field(
+    #     default=0.5,
+    #     description="Scale factor for the draft jobs",
+    # )
     kitsu_task: uuid.UUID = Field(
         default=None,
         description="The kitsu task UUID",
