@@ -35,6 +35,6 @@ class PluginHoudini_19_5_805(PluginHoudiniBase):
 
 
 class PluginHoudiniKarma_19_5_805(PluginHoudiniKarmaBase):
-    plugin_type: Literal['PluginHoudini_19_5_805']
+    plugin_type: Literal['PluginHoudiniKarma_19_5_805']
 
     executable: pathlib.Path = REZ_PACKAGES /  "houdini" / "19.5.805" / "husk"
