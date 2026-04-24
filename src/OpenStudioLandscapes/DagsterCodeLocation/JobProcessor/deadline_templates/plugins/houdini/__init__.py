@@ -35,15 +35,15 @@ class PluginHoudiniBase(PluginBase):
         "<QUOTE>{job_file}<QUOTE>",
     ]
 
-    example_cmd: List[str] = [
-        "hrender",
-        "-v",
-        "-e",
-        "-f", "1001", "1010",
-        "-i", "1",
-        "-d", "/stage/usdrender_rop_camera2",
-        "/data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.hip",
-    ]
+    # example_cmd: List[str] = [
+    #     "hrender",
+    #     "-v",
+    #     "-e",
+    #     "-f", "1001", "1010",
+    #     "-i", "1",
+    #     "-d", "/stage/usdrender_rop_camera2",
+    #     "/data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.hip",
+    # ]
 
 
 class Renderer(enum.StrEnum):
@@ -426,15 +426,15 @@ class PluginHoudiniKarmaBase(PluginBase):
     #     ),
     # )
 
-    cut_in: int = Field(
-        description="The start frame for rendering",
-        alias="cut_in"
-    )
-
-    cut_out: int = Field(
-        description="The start frame for rendering",
-        alias="cut_in"
-    )
+    # cut_in: int = Field(
+    #     description="The start frame for rendering",
+    #     alias="cut_in"
+    # )
+    #
+    # cut_out: int = Field(
+    #     description="The start frame for rendering",
+    #     alias="cut_in"
+    # )
 
     # frame_count: int = Field(
     #     default=1,
@@ -450,31 +450,31 @@ class PluginHoudiniKarmaBase(PluginBase):
     #     description="The frame increment",
     # )
 
-    fps: float = Field(
-        default=24.0,
-        description="Override the frames per second defined on the stage.",
-    )
+    # fps: float = Field(
+    #     default=24.0,
+    #     description="Override the frames per second defined on the stage.",
+    # )
 
     usd_input: pathlib.Path = Field(
         description="The USD file for the scene",
     )
 
-    disable_motion_blur: bool = Field(
-        default=False,
-        description="Override any render settings and disable motion blur",
-    )
+    # disable_motion_blur: bool = Field(
+    #     default=False,
+    #     description="Override any render settings and disable motion blur",
+    # )
 
-    disable_scene_materials: bool = Field(
-        default=False,
-        description="Disable scene materials. This applies to "
-                    "all render delegates.",
-    )
+    # disable_scene_materials: bool = Field(
+    #     default=False,
+    #     description="Disable scene materials. This applies to "
+    #                 "all render delegates.",
+    # )
 
-    disable_scene_lights: bool = Field(
-        default=False,
-        description="Disable scene lights. This applies to "
-                    "all render delegates.",
-    )
+    # disable_scene_lights: bool = Field(
+    #     default=False,
+    #     description="Disable scene lights. This applies to "
+    #                 "all render delegates.",
+    # )
 
     complexity: Union[int, Complexity] = Field(
         default=Complexity.veryhigh.value,

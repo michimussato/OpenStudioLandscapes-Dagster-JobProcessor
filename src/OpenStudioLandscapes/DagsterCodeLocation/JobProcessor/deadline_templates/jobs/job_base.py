@@ -181,18 +181,6 @@ class JobBase(BaseModel):
         description="The initial job status after submission",
         examples=[i.name for i in OutputFormats],
     )
-    # append_draft_job_png: bool = Field(
-    #     default=False,
-    # )
-    # append_draft_job_mov: bool = Field(
-    #     default=False,
-    # )
-    # with_kitsu_publish: bool = Field(
-    #     default=False,
-    # )
-    # deadline_job_with_draft: bool = Field(
-    #     default=False,
-    # )
     comment: str = Field(
         default_factory=str,
         description="The comment for a render job",

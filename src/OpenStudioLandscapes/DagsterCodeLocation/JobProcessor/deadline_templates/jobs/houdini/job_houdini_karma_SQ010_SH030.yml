@@ -8,10 +8,12 @@ deadline_config:
   rest_api: http://miniboss:8899/api/
   user: michael
   host: lenovo
-usd_input: /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
+job_file: /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
 job_priority: 60
 plugin_model:
   plugin_type: PluginHoudiniKarma_19_5_805
+  settings: /Render/rendersettings
+  usd_input: /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
   # rop: /stage/usdrender_rop_camera2
 deadline_initial_status: Active
 kitsu_task: 5c67696c-1641-4414-b99e-2ea153754095
@@ -19,7 +21,6 @@ comment: This is a new Houdini job comment
 cut_in: 1001
 cut_out: 1010
 #frame_count: 10
-settings: /Render/rendersettings
 #output:
 
 # Paste this file in
