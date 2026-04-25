@@ -18,7 +18,7 @@ class RenderEngine(enum.StrEnum):
 # - Karma (without -o)
 # - hrender -v -e -f 1002 1003 -i 1 -d /stage/usdrender_rop_camera2 /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.hip
 class PluginHoudiniBase(PluginBase):
-    padding_command: str = "'\\$F' + str(EVAL_PADDING)"  # results in "$F4"
+    padding_command: str = "'$F' + str(EVAL_PADDING)"  # results in "$F4"
     # https://www.sidefx.com/docs/houdini/ref/utils/hrender.html
     # karma: https://deborahfowler.com/HoudiniResources/Overview-CommandLineRenderingKarma.html
     args: List = [
@@ -29,8 +29,8 @@ class PluginHoudiniBase(PluginBase):
         "-f", "<STARTFRAME> <ENDFRAME>",  # with "-e":      -f start end    Frame range start and end
         "-i", "{chunk_size}",  # with "-e":      -i increment    Frame increment
         "-d", "{rop}",
-        "-o", "<QUOTE>{render_output}<QUOTE>",
-        "<QUOTE>{job_file}<QUOTE>",
+        "-o", "'{render_output}'",
+        "'{job_file}'",
     ]
 
     # example_cmd: List[str] = [
