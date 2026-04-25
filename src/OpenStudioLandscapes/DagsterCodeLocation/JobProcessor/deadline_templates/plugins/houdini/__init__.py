@@ -2,7 +2,7 @@ import enum
 import textwrap
 from typing import List, Union
 
-from pydantic.fields import Field
+from pydantic.fields import Field, computed_field
 
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins.plugin_base import PluginBase
 
@@ -479,7 +479,7 @@ class PluginHoudiniKarmaBase(PluginBase):
         )
     )
 
-    purpose: str = Field(
+    purpose: List[Purpose] = Field(
         # default=f"{Purpose.geometry.value},{Purpose.render.value}",
         default=[
             Purpose.geometry.value,
@@ -495,8 +495,9 @@ class PluginHoudiniKarmaBase(PluginBase):
         )
     )
 
+    @computed_field
     @property
-    def purpose_str(self):
+    def purpose_str(self) -> str:
         return ",".join(self.purpose)
 
     # # @field_validator("purpose")
