@@ -99,7 +99,7 @@ class PluginHoudiniKarmaBase(PluginBase):
         "--fps", "{fps}",
         "--usd-input", "<QUOTE>'{job_file}'<QUOTE>",
         "--complexity", "{complexity}",
-        "--output", "<QUOTE>'{render_output}'<QUOTE>",
+        "--output", "<QUOTE>{render_output}<QUOTE>",
 
         # "--render-format", "{output_format}",
         # # "--use-extension", "{use_extension}",
