@@ -2,10 +2,8 @@ import enum
 import textwrap
 from typing import List, Union
 
-from pydantic import field_validator
 from pydantic.fields import Field
 
-# from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins import DEADLINE_PLUGINS
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins.plugin_base import PluginBase
 
 
@@ -90,7 +88,7 @@ class PluginHoudiniKarmaBase(PluginBase):
         "--make-output-path",
         "--settings", "{settings}",
         "--renderer", "{renderer}",
-        "--purpose", "{purpose}",
+        "--purpose", "{purpose_str}",
         # "--frame", "{cut_in}",
         "--frame", "<STARTFRAME>",
         # "--frame-count", "{cut_out - cut_in}",
@@ -100,16 +98,6 @@ class PluginHoudiniKarmaBase(PluginBase):
         "--usd-input", "'{job_file}'",
         "--complexity", "{complexity}",
         "--output", "'{render_output}'",
-
-        # "--render-format", "{output_format}",
-        # # "--use-extension", "{use_extension}",
-        # "--engine", "{render_engine}",
-        # "--frame-start", "<STARTFRAME>",
-        # "--frame-end", "<ENDFRAME>",
-        # "--threads", "0",
-        # "--render-anim",
-        # "--",
-        # "--cycles-print-stats",
     ]
 
     # help: str = Field(
@@ -492,7 +480,11 @@ class PluginHoudiniKarmaBase(PluginBase):
     )
 
     purpose: str = Field(
-        default=f"{Purpose.geometry.value},{Purpose.render.value}",
+        # default=f"{Purpose.geometry.value},{Purpose.render.value}",
+        default=[
+            Purpose.geometry.value,
+            Purpose.render.value,
+        ],
         description=textwrap.dedent(
             """
             --purpose arg (=geometry,render)      Specify the purpose for rendering.  
@@ -503,9 +495,13 @@ class PluginHoudiniKarmaBase(PluginBase):
         )
     )
 
-    # @field_validator("purpose")
-    # @classmethod
-    # def concat_purpose(cls, v: List[Purpose]) -> str:
+    @property
+    def purpose_str(self):
+        return ",".join(self.purpose)
+
+    # # @field_validator("purpose")
+    # @model_validator(mode="after")
+    # def concat_purpose(self, v: List[Purpose]) -> str:
     #     return ",".join(v)
 
     settings: str = Field(

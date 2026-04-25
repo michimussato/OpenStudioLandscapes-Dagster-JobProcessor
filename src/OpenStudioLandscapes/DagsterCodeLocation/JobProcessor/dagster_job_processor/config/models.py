@@ -120,5 +120,5 @@ class DefaultConstants(BaseModel):
     )
 
 
-class Submitter(BaseModel):
-    pass
+# class Submitter(BaseModel):
+#     pass
