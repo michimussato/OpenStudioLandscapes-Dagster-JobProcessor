@@ -71,7 +71,7 @@ class Purpose(enum.StrEnum):
 # - /data/share/tools/houdini-19.5.805-linux_x86_64_gcc9.3# husk -s --make-output-path -f 1010 -R BRAY_HdKarma --purpose geometry,render --complexity veryhigh --snapshot 300 --output /data/share/AWSPortalRoot1/hello.$F4.exr -Vcet9 /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
 # - /data/share/tools/houdini-19.5.805-linux_x86_64_gcc9.3# husk --settings /Render/rendersettings --make-output-path --frame 1021 --frame-count 1 --frame-inc 1 --renderer BRAY_HdKarma --purpose geometry,render --complexity veryhigh --snapshot 300 --output /data/share/AWSPortalRoot1/hello1.\$F4.exr --verbose CeT9 /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
 class PluginHoudiniKarmaBase(PluginBase):
-    padding_command: str = "'\\$F' + str(EVAL_PADDING)"  # results in "$F4"
+    padding_command: str = "'$F' + str(EVAL_PADDING)"  # results in "$F4"
 
     # example_cmd_husk: List[str] = [
     #     "husk",
@@ -537,7 +537,7 @@ class PluginHoudiniKarmaBase(PluginBase):
     # )
 
     verbosity: str = Field(
-        default="ce9",
+        default="Ce9",
         description=textwrap.dedent(
             """
             -V [ --verbose ] arg                  Render verbosity (e.g. -Va2)
