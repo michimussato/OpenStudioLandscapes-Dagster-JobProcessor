@@ -1,15 +1,3 @@
-from dagster import (
-    DefaultSensorStatus,
-)
-
-
-"""
-ExperimentalWarning: Class `AndAssetCondition` is experimental. It may break in future versions, even between dot releases. To mute warnings for experimental functionality, invoke warnings.filterwarnings("ignore", category=dagster.ExperimentalWarning) or use one of the other methods described at https://docs.python.org/3/library/warnings.html#describing-warning-filters.
-"""
-
-
-SENSORS_STATUS = DefaultSensorStatus.RUNNING
-
 # Todo
 #  - [ ] Disable as long as no certificates are involved
 DEADLINE_ERRORS = [

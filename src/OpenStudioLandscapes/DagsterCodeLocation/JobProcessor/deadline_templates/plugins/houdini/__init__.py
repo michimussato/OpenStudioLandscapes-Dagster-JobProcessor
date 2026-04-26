@@ -414,16 +414,6 @@ class PluginHoudiniKarmaBase(PluginBase):
     #     ),
     # )
 
-    # cut_in: int = Field(
-    #     description="The start frame for rendering",
-    #     alias="cut_in"
-    # )
-    #
-    # cut_out: int = Field(
-    #     description="The start frame for rendering",
-    #     alias="cut_in"
-    # )
-
     # frame_count: int = Field(
     #     default=1,
     #     description="The number of frames to render",
@@ -499,11 +489,6 @@ class PluginHoudiniKarmaBase(PluginBase):
     @property
     def purpose_str(self) -> str:
         return ",".join(self.purpose)
-
-    # # @field_validator("purpose")
-    # @model_validator(mode="after")
-    # def concat_purpose(self, v: List[Purpose]) -> str:
-    #     return ",".join(v)
 
     settings: str = Field(
         # default="/Render/rendersettings",
