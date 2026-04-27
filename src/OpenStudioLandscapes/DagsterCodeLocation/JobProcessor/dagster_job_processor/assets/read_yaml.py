@@ -281,38 +281,81 @@ def get_kitsu_task_dict(
     )
 
 
-@asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
-    ins={
-        "get_kitsu_task_dict": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_PREPROCESSOR_KITSU["key_prefix"], "get_kitsu_task_dict"])
-        )
-    },
-)
-def get_task_url(
-        context: AssetExecutionContext,
-        kitsu_resource: KitsuResource,
-        get_kitsu_task_dict: Dict,
-) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
-    """Returns a Kitsu task dict as a MaterializeResult object in the JSON format."""
-
-    # TODO: make fail safe
-
-    if "error" in get_kitsu_task_dict:
-        raise Exception(f"Kitsu task ID is set but can't get Task URL from Kitsu for this shot:\n"
-                        f"{get_kitsu_task_dict['error']}")
-
-    task_dict = get_kitsu_task_dict
-    task_url = kitsu_resource.get_task_url(task_dict=task_dict)
-
-    yield Output(task_url)
-
-    yield AssetMaterialization(
-        asset_key=context.asset_key,
-        metadata={
-            "__".join(context.asset_key.path): MetadataValue.url(task_url),
-        }
-    )
+# @asset(
+#     **ASSET_HEADER_JOB_PROCESSOR,
+#     ins={
+#         "get_kitsu_task_dict": AssetIn(
+#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR_PREPROCESSOR_KITSU["key_prefix"], "get_kitsu_task_dict"])
+#         )
+#     },
+# )
+# def get_task_url(
+#         context: AssetExecutionContext,
+#         kitsu_resource: KitsuResource,
+#         get_kitsu_task_dict: Dict,
+# ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
+#     """Returns a Kitsu task dict as a MaterializeResult object in the JSON format."""
+#     """
+#     dagster._core.errors.DagsterExecutionStepExecutionError: Error occurred while executing op "OpenStudioLandscapes_DagsterCodeLocation_JobProcessor_PreProcessor__get_task_url":
+#
+#       File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/execution/plan/execute_plan.py", line 245, in dagster_event_sequence_for_step
+#         yield from check.generator(step_events)
+#       File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/execution/plan/execute_step.py", line 501, in core_dagster_event_sequence_for_step
+#         for user_event in _step_output_error_checked_user_event_sequence(
+#       File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/execution/plan/execute_step.py", line 184, in _step_output_error_checked_user_event_sequence
+#         for user_event in user_event_sequence:
+#       File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/execution/plan/execute_step.py", line 88, in _process_asset_results_to_events
+#         for user_event in user_event_sequence:
+#       File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/execution/plan/compute.py", line 190, in execute_core_compute
+#         for step_output in _yield_compute_results(step_context, inputs, compute_fn, compute_context):
+#       File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/execution/plan/compute.py", line 159, in _yield_compute_results
+#         for event in iterate_with_context(
+#       File "/opt/python3.11/lib/python3.11/site-packages/dagster/_utils/__init__.py", line 478, in iterate_with_context
+#         with context_fn():
+#       File "/opt/python3.11/lib/python3.11/contextlib.py", line 158, in __exit__
+#         self.gen.throw(typ, value, traceback)
+#       File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/execution/plan/utils.py", line 86, in op_execution_error_boundary
+#         raise error_cls(
+#
+#     The above exception was caused by the following exception:
+#     KeyError: 'project_id'
+#
+#       File "/opt/python3.11/lib/python3.11/site-packages/dagster/_core/execution/plan/utils.py", line 56, in op_execution_error_boundary
+#         yield
+#       File "/opt/python3.11/lib/python3.11/site-packages/dagster/_utils/__init__.py", line 480, in iterate_with_context
+#         next_output = next(iterator)
+#                       ^^^^^^^^^^^^^^
+#       File "/opt/python3.11/lib/python3.11/site-packages/OpenStudioLandscapes/DagsterCodeLocation/JobProcessor/dagster_job_processor/assets/read_yaml.py", line 306, in get_task_url
+#         task_url = kitsu_resource.get_task_url(task_dict=task_dict)
+#                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#       File "/opt/python3.11/lib/python3.11/site-packages/OpenStudioLandscapes/DagsterCodeLocation/JobProcessor/dagster_job_processor/resources/kitsu_resource.py", line 46, in get_task_url
+#         task_url = gazu.task.get_task_url(task=task_dict)
+#                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#       File "/opt/python3.11/lib/python3.11/site-packages/gazu/cache.py", line 212, in wrapper
+#         return function(*args, **kwargs)
+#                ^^^^^^^^^^^^^^^^^^^^^^^^^
+#       File "/opt/python3.11/lib/python3.11/site-packages/gazu/task.py", line 1575, in get_task_url
+#         return f"{host}/productions/{task['project_id']}/shots/tasks/{task['id']}/"
+#                                      ~~~~^^^^^^^^^^^^^^
+#     """
+#
+#     # TODO: make fail safe
+#
+#     if "error" in get_kitsu_task_dict:
+#         raise Exception(f"Kitsu task ID is set but can't get Task URL from Kitsu for this shot:\n"
+#                         f"{get_kitsu_task_dict['error']}")
+#
+#     task_dict = get_kitsu_task_dict
+#     task_url = kitsu_resource.get_task_url(task_dict=task_dict)
+#
+#     yield Output(task_url)
+#
+#     yield AssetMaterialization(
+#         asset_key=context.asset_key,
+#         metadata={
+#             "__".join(context.asset_key.path): MetadataValue.url(task_url),
+#         }
+#     )
 
 
 @asset(
