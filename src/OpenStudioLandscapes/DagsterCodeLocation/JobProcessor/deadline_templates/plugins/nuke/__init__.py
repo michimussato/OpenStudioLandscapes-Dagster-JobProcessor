@@ -1,5 +1,7 @@
 from typing import List
 
+from pydantic import Field, computed_field
+
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins.plugin_base import PluginBase
 # from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.jobs.job_base import job
 
@@ -37,11 +39,25 @@ from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.pl
 class PluginNukeBase(PluginBase):
     args: List = [
         # "--nukex",
+        "-x",
         "-t",  # terminal only (no gui); if <script> is a .py file it will be executed
         "-f",  # render at full size (turns off proxy; use -p to force render at proxy)
         # "-X", f'{",".join(job["write_nodes"])}'
+        "-X", "{write_nodes_str}",
         "-F", "<STARTFRAME>-<ENDFRAME>",  # if bool(job["write_nodes"])
-        "-x",
         "'{job_file}'",
         "'{render_output}'"
     ]
+
+    write_nodes: List[str] = Field(
+        default_factory=list,
+        description="List of Nuke write nodes to write execute.",
+    )
+
+    @computed_field
+    @property
+    def write_nodes_str(self) -> str:
+        if not bool(self.write_nodes):
+            return "''"
+        else:
+            return ",".join(self.write_nodes)
