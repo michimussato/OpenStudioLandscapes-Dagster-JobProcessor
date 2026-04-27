@@ -4,6 +4,9 @@
 # - https://kitsu.pangolin.openstudiolandscapes.cloud-ip.cc/productions/3ede4117-b73c-4bd3-83a2-40d66bc954c5/shots/5c67696c-1641-4414-b99e-2ea153754095
 # - SQ020_SH040 Rendering (5c67696c-1641-4414-b99e-2ea153754095)
 
+# Paste this file in
+# ${OPENSTUDIOLANDSCAPES__DAGSTER_JOBS_IN} (/data/share/in)
+
 deadline_config:
   rest_api: http://miniboss:8899/api/
   user: michael
@@ -18,13 +21,3 @@ kitsu_task: 5c67696c-1641-4414-b99e-2ea153754095
 comment: This is a new Houdini job comment
 cut_in: 1001
 cut_out: 1010
-
-# Paste this file in
-# ${OPENSTUDIOLANDSCAPES__DAGSTER_JOBS_IN} (/data/share/in)
-#
-# After processing file
-# - https://dagster-mb.pangolin.openstudiolandscapes.cloud-ip.cc/locations/OpenStudioLandscapes-Dagster-JobProcessor%20Package%20Code%20Location/sensors/ingestion_sensor
-# Run command locally:
-# (because deadlinecommand is not available in OpenStudioLandscapes-Dagster image)
-#
-# /opt/Thinkbox/Deadline10/bin/deadlinecommand -SubmitMultipleJobsV2 -jsonfilepath "/data/share/AWSPortalRoot1/out/Test Production/Shot/SH030/Rendering/008/4_1197-1254_4/submission.json"
