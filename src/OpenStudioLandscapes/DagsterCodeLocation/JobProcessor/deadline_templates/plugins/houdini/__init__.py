@@ -2,7 +2,7 @@ import enum
 import textwrap
 from typing import List, Union
 
-from pydantic.fields import Field, computed_field
+from pydantic import Field, computed_field
 
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins.plugin_base import PluginBase
 
