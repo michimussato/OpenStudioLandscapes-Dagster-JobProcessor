@@ -38,3 +38,15 @@ class PluginBase(BaseModel):
         default="'%' + str(EVAL_PADDING).zfill(2) + 'd'",  # Results in '%04d'
         description="The padding character for arbitrary commands",
     )
+    farm_command: str = Field(
+        default_factory=str,
+        description="This represents a test command that should work as is "
+                    "and should act as an example to show what's going to "
+                    "be run (i.e. on the farm).",
+        exclude=True,
+    )
+    help_command: str = Field(
+        default_factory=str,
+        description="Help command.",
+        exclude=True,
+    )

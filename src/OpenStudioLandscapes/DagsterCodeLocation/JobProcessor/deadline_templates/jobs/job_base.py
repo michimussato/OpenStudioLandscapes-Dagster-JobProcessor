@@ -8,12 +8,16 @@ from pydantic import BaseModel, Field, field_validator
 
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.jobs.models_submission import InitialStatuses
 
-from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins.blender.plugin_blender__4_1_1 import PluginBlender_4_1_1
-from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins.houdini.plugin_houdini__19_5_805 import (
-    PluginHoudini_19_5_805,
-    PluginHoudiniKarma_19_5_805,
+from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins.blender import (
+    plugin_blender__4_1_1,
 )
-from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins.nuke.plugin_nuke__15_0v4 import PluginNuke_15_0v4
+from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins.houdini import (
+    plugin_houdini__19_5_805,
+)
+from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.plugins.nuke import (
+    plugin_nuke__15_0v4,
+    plugin_nuke__15_1v1,
+)
 
 
 class OutputFormats(enum.StrEnum):
@@ -136,10 +140,12 @@ class JobBase(BaseModel):
     )
 
     plugin_model: Union[
-        PluginBlender_4_1_1,
-        PluginHoudini_19_5_805,
-        PluginHoudiniKarma_19_5_805,
-        PluginNuke_15_0v4,
+        plugin_blender__4_1_1.PluginBlender_4_1_1,
+        plugin_houdini__19_5_805.PluginHoudini_19_5_805,
+        plugin_houdini__19_5_805.PluginHoudiniKarma_19_5_805,
+        plugin_nuke__15_0v4.PluginNuke_15_0v4,
+        plugin_nuke__15_1v1.PluginNuke_15_1v1,
+        plugin_nuke__15_1v1.PluginNukeX_15_1v1,
     ] = Field(
         # Help on discriminator:
         # - https://docs.pydantic.dev/latest/concepts/unions/#discriminated-unions-with-callable-discriminator

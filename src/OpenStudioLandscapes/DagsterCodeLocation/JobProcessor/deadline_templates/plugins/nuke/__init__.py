@@ -36,12 +36,12 @@ from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.pl
 
 class PluginNukeBase(PluginBase):
     args: List = [
-        "--nukex",
+        # "--nukex",
         "-t",  # terminal only (no gui); if <script> is a .py file it will be executed
         "-f",  # render at full size (turns off proxy; use -p to force render at proxy)
         # "-X", f'{",".join(job["write_nodes"])}'
         "-F", "<STARTFRAME>-<ENDFRAME>",  # if bool(job["write_nodes"])
         "-x",
-        "<QUOTE>{job_file}<QUOTE>",
-        '<QUOTE>\\\"{render_output}\\\"<QUOTE>'
+        "'{job_file}'",
+        "'{render_output}'"
     ]
