@@ -1,8 +1,8 @@
 # Production:
 # - Test Production (3ede4117-b73c-4bd3-83a2-40d66bc954c5)
 # Task:
-# - https://kitsu.pangolin.openstudiolandscapes.cloud-ip.cc/productions/3ede4117-b73c-4bd3-83a2-40d66bc954c5/shots/tasks/04d51b0e-da48-40c1-924e-3bb9466a0121
-# - SQ030_SH070 Compositing (04d51b0e-da48-40c1-924e-3bb9466a0121)
+# - https://kitsu.pangolin.openstudiolandscapes.cloud-ip.cc/productions/3ede4117-b73c-4bd3-83a2-40d66bc954c5/shots/tasks/d7754435-f95c-4319-8eb4-4b1b5ae5ad55
+# - SQ030_SH070 Compositing (d7754435-f95c-4319-8eb4-4b1b5ae5ad55)
 
 # Paste this file in
 # ${OPENSTUDIOLANDSCAPES__DAGSTER_JOBS_IN} (/data/share/in)
@@ -18,7 +18,7 @@ plugin_model:
   write_nodes:
   - write_farm
 deadline_initial_status: Active
-kitsu_task: 04d51b0e-da48-40c1-924e-3bb9466a0121
+kitsu_task: d7754435-f95c-4319-8eb4-4b1b5ae5ad55
 comment: This is Nuke job comment
 frame_start: 1051
 frame_end: 1100
