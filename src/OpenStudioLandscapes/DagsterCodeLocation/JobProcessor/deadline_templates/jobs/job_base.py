@@ -192,12 +192,23 @@ class JobBase(BaseModel):
         description="The comment for a render job",
     )
     cut_in: int = Field(
-        default=1001,
+        default=None,
+        # No default. Has to be specified here or through Kitsu
         description="The cut in",
     )
+    cut_in_default: int = Field(
+        default=1001,
+        description="The default cut in",
+        exclude=True,
+    )
     cut_out: int = Field(
-        default=1100,
+        default=None,
+        # No default. Has to be specified here or through Kitsu
         description="The cut out",
+    )
+    cut_out_default: int = Field(
+        default=1010,
+        description="The default cut out",
     )
     # # resolution_draft_scale: PositiveFloat = Field(
     # resolution_draft_scale: float = Field(

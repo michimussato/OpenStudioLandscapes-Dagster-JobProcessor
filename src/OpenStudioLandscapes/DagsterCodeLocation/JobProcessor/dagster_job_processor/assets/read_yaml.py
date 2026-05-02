@@ -23,7 +23,19 @@ from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.jo
 
 
 # TODO
-#  rename to generate_job_submission_scripts
+#  - [ ] rename to generate_job_submission_scripts
+#  - [ ] multi_asset for
+#        - render_output_directory
+#        - render_output_filename
+#        - render_version_directory
+#  - [ ] multi_asset for
+#        - job_title
+#        - job_title_str
+#  - [x] multi_asset for
+#        - frame_start
+#        - frame_end
+#        - frame_range
+#  [...]
 
 
 GROUP_JOB_PROCESSOR_READER = "OpenStudioLandscapes_DagsterCodeLocation_JobProcessor_Reader"
@@ -727,6 +739,197 @@ def batch_name(
     )
 
 
+@multi_asset(
+    ins={
+        "get_kitsu_task_dict": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_PREPROCESSOR_KITSU["key_prefix"], "get_kitsu_task_dict"])
+        ),
+        "job_model": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"])
+        ),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
+        ),
+    },
+    outs={
+        "cut_in": AssetOut(
+            **ASSET_HEADER_JOB_PROCESSOR,
+            dagster_type=int,
+            description="Cut range IN.",
+        ),
+        "cut_out": AssetOut(
+            **ASSET_HEADER_JOB_PROCESSOR,
+            dagster_type=int,
+            description="Cut range OUT.",
+        ),
+        "work_in": AssetOut(
+            **ASSET_HEADER_JOB_PROCESSOR,
+            dagster_type=int,
+            description="Work range IN: cut_in - Handles.",
+        ),
+        "work_out": AssetOut(
+            **ASSET_HEADER_JOB_PROCESSOR,
+            dagster_type=int,
+            description="Work range OUT: cut_out + Handles.",
+        ),
+        "render_frames": AssetOut(
+            **ASSET_HEADER_JOB_PROCESSOR,
+            dagster_type=str,
+            description="Todo",
+        ),
+    },
+)
+def calc_frames(
+        context: AssetExecutionContext,
+        get_kitsu_task_dict: Dict,
+        job_model: JobBase,
+        CONFIG: DefaultConstants,
+):
+
+    """
+    frame_in = get_kitsu_task_dict["entity"]["data"]["frame_in"]
+    frame_out = get_kitsu_task_dict["entity"]["data"]["frame_out"]
+    nb_frames = get_kitsu_task_dict["entity"]["nb_frames"]
+
+    Priorities:
+    1. [x] manual via config
+    2. [x] Kitsu Shot
+    3. [ ] Kitsu Project
+    4. [x] Config Default
+    """
+
+    cut_in = job_model.cut_in \
+            or get_kitsu_task_dict.get("entity", {}).get("data", {}).get("frame_in", 0) \
+            or job_model.cut_in_default
+
+    cut_out = job_model.cut_out \
+            or get_kitsu_task_dict.get("entity", {}).get("data", {}).get("frame_out", 0) \
+            or job_model.cut_out_default
+
+    # extend work range with handles
+    work_in = cut_in - job_model.handles
+    work_out = cut_out + job_model.handles
+
+    if any([i < 0 for i in [work_in, work_out]]):
+        if CONFIG.DONT_ALLOW_NEGATIVE_FRAMES:
+            raise Exception("Negative frames not allowed")
+
+    ###########
+    # work_in #
+    ###########
+
+    output_name = "work_in"
+
+    yield Output(
+        output_name=output_name,
+        value=work_in,
+    )
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key_for_output(output_name),
+        metadata={
+            "__".join(
+                context.asset_key_for_output(output_name).path
+            ): MetadataValue.int(work_in),
+        },
+    )
+
+    ############
+    # work_out #
+    ############
+
+    output_name = "work_out"
+
+    yield Output(
+        output_name=output_name,
+        value=work_out,
+    )
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key_for_output(output_name),
+        metadata={
+            "__".join(
+                context.asset_key_for_output(output_name).path
+            ): MetadataValue.int(work_out),
+        },
+    )
+
+    ##########
+    # cut_in #
+    ##########
+
+    output_name = "cut_in"
+
+    yield Output(
+        output_name=output_name,
+        value=cut_in,
+    )
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key_for_output(output_name),
+        metadata={
+            "__".join(
+                context.asset_key_for_output(output_name).path
+            ): MetadataValue.int(cut_in),
+        },
+    )
+
+    ###########
+    # cut_out #
+    ###########
+
+    output_name = "cut_out"
+
+    yield Output(
+        output_name=output_name,
+        value=cut_out,
+    )
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key_for_output(output_name),
+        metadata={
+            "__".join(
+                context.asset_key_for_output(output_name).path
+            ): MetadataValue.int(cut_out),
+        },
+    )
+
+    #################
+    # render_frames #
+    #################
+
+    # make sure we filter frame jumps according to the chunk_size
+    # for nuke, render time could be way slower if it has
+    # to be launched for every single frame
+    # frame_jumps = [i for i in constants.FRAME_JUMPS if i <= combine_dicts["yaml_submission"]["chunk_size"]]
+
+    if job_model.chunk_size > 1:
+        frame_jumps = [min(CONFIG.FRAME_JUMPS)]
+    else:
+        frame_jumps = CONFIG.FRAME_JUMPS
+
+    frame_list = ",".join([
+        f"{work_in}-{work_out}x{int(i)}"
+        for i in frame_jumps
+    ])
+
+    output_name = "render_frames"
+
+    yield Output(
+        output_name=output_name,
+        value=frame_list,
+    )
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key_for_output(output_name),
+        metadata={
+            "__".join(
+                context.asset_key_for_output(output_name).path
+            ): MetadataValue.text(frame_list),
+        },
+    )
+
+
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
@@ -748,6 +951,12 @@ def fps(
     frame_in = get_kitsu_task_dict["entity"]["data"]["frame_in"]
     frame_out = get_kitsu_task_dict["entity"]["data"]["frame_out"]
     nb_frames = get_kitsu_task_dict["entity"]["nb_frames"]
+
+    Priorities:
+    1. manual via config
+    2. Kitsu Shot
+    3. Kitsu Project
+    4. Config Default
     """
 
     if bool(job_model.kitsu_task):
@@ -809,156 +1018,6 @@ def output_format(
     )
 
 
-@asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
-    ins={
-        "get_kitsu_task_dict": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_PREPROCESSOR_KITSU["key_prefix"], "get_kitsu_task_dict"])
-        ),
-        "job_model": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"])
-        ),
-        "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
-        ),
-    }
-)
-def frame_start_absolute(
-        # Todo:
-        #  - [ ] rename to `work_in`
-        #  - [ ] use `shot_range` instead?
-        context: AssetExecutionContext,
-        get_kitsu_task_dict: Dict,
-        job_model: JobBase,
-        CONFIG: DefaultConstants,
-) -> Generator[Output[int | Any] | AssetMaterialization | Any, Any, None]:
-
-    """
-    frame_in = get_kitsu_task_dict["entity"]["data"]["frame_in"]
-    frame_out = get_kitsu_task_dict["entity"]["data"]["frame_out"]
-    nb_frames = get_kitsu_task_dict["entity"]["nb_frames"]
-    """
-
-    fs = job_model.cut_in
-
-    fs_kitsu = get_kitsu_task_dict.get("entity", {}).get("data", {}).get("frame_in", 0)
-
-    fsa = fs - job_model.handles
-
-    if CONFIG.DONT_ALLOW_NEGATIVE_FRAMES:
-        raise Exception("Negative frames not allowed")
-
-    yield Output(fsa)
-
-    yield AssetMaterialization(
-        asset_key=context.asset_key,
-        metadata={
-            "__".join(context.asset_key.path): MetadataValue.int(fsa),
-            "work_in": MetadataValue.int(fsa),
-            "cut_in": MetadataValue.int(fs),
-            "cut_in_kitsu": MetadataValue.int(fs_kitsu),
-        }
-    )
-
-
-@asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
-    ins={
-        "get_kitsu_task_dict": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_PREPROCESSOR_KITSU["key_prefix"], "get_kitsu_task_dict"])
-        ),
-        "job_model": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"])
-        ),
-        "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
-        ),
-    }
-)
-def frame_end_absolute(
-        # Todo:
-        #  - [ ] rename to `work_out`
-        #  - [ ] use `shot_range` instead?
-        context: AssetExecutionContext,
-        get_kitsu_task_dict: Dict,
-        job_model: JobBase,
-        CONFIG: DefaultConstants,
-) -> Generator[Output[int | Any] | AssetMaterialization | Any, Any, None]:
-
-    fe = job_model.cut_out
-
-    fe_kitsu = get_kitsu_task_dict.get("entity", {}).get("data", {}).get("frame_out", 0)
-
-    fea = fe + job_model.handles
-
-    if CONFIG.DONT_ALLOW_NEGATIVE_FRAMES:
-        raise Exception("Negative frames not allowed")
-
-    yield Output(fea)
-
-    yield AssetMaterialization(
-        asset_key=context.asset_key,
-        metadata={
-            "__".join(context.asset_key.path): MetadataValue.int(fea),
-            "work_out": MetadataValue.int(fea),
-            "cut_out": MetadataValue.int(fe),
-            "cut_out_kitsu": MetadataValue.int(fe_kitsu),
-        }
-    )
-
-
-@asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
-    ins={
-        "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
-        ),
-        "frame_start_absolute": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_start_absolute"])
-        ),
-        "frame_end_absolute": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_end_absolute"])
-        ),
-        "job_model": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"])
-        ),
-    }
-)
-def frames(
-        # Todo
-        #  - [ ] use `cut_range` and `shot_range`/`work_range` instead?
-        context: AssetExecutionContext,
-        CONFIG: DefaultConstants,
-        frame_start_absolute: int,
-        frame_end_absolute: int,
-        job_model: JobBase,
-) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
-
-    # make sure we filter frame jumps according to the chunk_size
-    # for nuke, render time could be way slower if it has
-    # to be launched for every single frame
-    # frame_jumps = [i for i in constants.FRAME_JUMPS if i <= combine_dicts["yaml_submission"]["chunk_size"]]
-
-    if job_model.chunk_size > 1:
-        frame_jumps = [min(CONFIG.FRAME_JUMPS)]
-    else:
-        frame_jumps = CONFIG.FRAME_JUMPS
-
-    frame_list = ",".join([
-        f"{frame_start_absolute}-{frame_end_absolute}x{int(i)}"
-        for i in frame_jumps
-    ])
-
-    yield Output(frame_list)
-
-    yield AssetMaterialization(
-        asset_key=context.asset_key,
-        metadata={
-            "__".join(context.asset_key.path): MetadataValue.text(frame_list)
-        }
-    )
-
-
 @multi_asset(
     outs={
         "job_info_model": AssetOut(
@@ -977,8 +1036,8 @@ def frames(
         "render_output_directory": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"])
         ),
-        "frames": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frames"])
+        "render_frames": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_frames"])
         ),
         "render_output_filename": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_filename"])
@@ -993,7 +1052,7 @@ def job_info(
         batch_name: str,
         job_title_str: str,
         render_output_directory: pathlib.Path,
-        frames: str,
+        render_frames: str,
         render_output_filename: Dict,
         job_model: JobBase,
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization | Any, Any, None]:
@@ -1006,7 +1065,7 @@ def job_info(
 
     job_info_dict = {
         "Plugin": models_submission.DeadlinePlugins.CommandLine.value,
-        "Frames": frames,
+        "Frames": render_frames,
         "Name": job_title_str,
         "Comment": job_model.comment,
         # "Department"
@@ -1114,38 +1173,6 @@ def plugin_info(
             ),
         }
     )
-
-
-# @asset(
-#     **ASSET_HEADER_JOB_PROCESSOR_DEADLINE,
-#     ins={
-#         "job_info_file": AssetIn(
-#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR_DEADLINE["key_prefix"], "job_info_file"])
-#         ),
-#         "plugin_info_file": AssetIn(
-#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR_DEADLINE["key_prefix"], "plugin_info_file"])
-#         ),
-#     }
-# )
-# def job_main(
-#         context: AssetExecutionContext,
-#         job_info_file: pathlib.Path,
-#         plugin_info_file: pathlib.Path,
-# ) -> Generator[Output[Dict[str, str]] | AssetMaterialization | Any, Any, None]:
-#
-#     ret = {
-#         "JobInfoFilePath": job_info_file.as_posix(),
-#         "PluginInfoFilePath": plugin_info_file.as_posix(),
-#     }
-#
-#     yield Output(ret)
-#
-#     yield AssetMaterialization(
-#         asset_key=context.asset_key,
-#         metadata={
-#             "__".join(context.asset_key.path): MetadataValue.json(ret)
-#         }
-#     )
 
 
 @asset(
@@ -1258,35 +1285,6 @@ def render_arguments(
 @asset(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
-        "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
-        ),
-        "resolution": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "resolution"]),
-        ),
-    }
-)
-def resolution_draft(
-        context: AssetExecutionContext,
-        CONFIG: DefaultConstants,
-        resolution: Resolution,
-) -> Generator[Output[Resolution] | AssetMaterialization | Any, Any, None]:
-
-    ret = Resolution(*tuple(ti * CONFIG.RESOLUTION_DRAFT_SCALE for ti in resolution))
-
-    yield Output(ret)
-
-    yield AssetMaterialization(
-        asset_key=context.asset_key,
-        metadata={
-            "__".join(context.asset_key.path): MetadataValue.json(ret)
-        }
-    )
-
-
-@asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
-    ins={
         "get_kitsu_task_dict": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR_PREPROCESSOR_KITSU["key_prefix"], "get_kitsu_task_dict"])
         ),
@@ -1300,6 +1298,13 @@ def resolution(
         get_kitsu_task_dict: Dict,
         job_model: JobBase,
 ) -> Generator[Output[Resolution] | AssetMaterialization | Any, Any, None]:
+    """
+    Priorities:
+    1. manual via config
+    2. Kitsu Shot
+    3. Kitsu Project
+    4. Config Default
+    """
 
     resolution_job: Resolution = job_model.resolution
 
