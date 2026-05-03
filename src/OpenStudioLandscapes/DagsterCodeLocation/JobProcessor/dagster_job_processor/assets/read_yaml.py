@@ -492,7 +492,7 @@ def calc_render_output_directory(
     # render_output_directory #
     ###########################
 
-    render_output_directory = render_version_directory.joinpath(version)
+    render_output_directory = render_version_directory.joinpath(new_version)
 
     render_output_directory.mkdir(parents=True, exist_ok=True)
 
