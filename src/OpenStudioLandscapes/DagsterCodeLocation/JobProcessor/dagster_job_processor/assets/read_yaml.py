@@ -400,7 +400,7 @@ def get_kitsu_task_dict(
         ),
         "version": AssetOut(
             **ASSET_HEADER_JOB_PROCESSOR,
-            dagster_type=pathlib.Path,
+            dagster_type=str,
             description="The render base directory "
                         "where the version increments will be "
                         "created.",
@@ -431,7 +431,12 @@ def calc_render_output_directory(
 
     entity_type = get_entity_type(get_kitsu_task_dict)
 
-    render_version_directory = pathlib.Path(f'{CONFIG.OUTPUT_ROOT}/{show_name}/{entity_type}/{entity_name}/{task_name}/')
+    render_version_directory = CONFIG.OUTPUT_ROOT.joinpath(
+        show_name,
+        entity_type,
+        entity_name,
+        task_name,
+    )
     render_version_directory.mkdir(parents=True, exist_ok=True)
 
     output_name = "render_version_directory"
@@ -463,7 +468,7 @@ def calc_render_output_directory(
     dirs.sort()
     version_ = max(dirs)
     new_version = str(int(version_) + 1).zfill(CONFIG.PADDING_VERSION)
-    new_version_dir = pathlib.Path(f"{render_version_directory}/{new_version}")
+    new_version_dir = render_version_directory.joinpath(new_version)
     new_version_dir.mkdir(parents=True, exist_ok=True)
 
     output_name = "version"

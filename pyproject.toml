@@ -29,6 +29,10 @@ requires-python = ">=3.11,<3.13"
 dependencies = [
     "dagster==1.9.11",
     "gazu[cli]",
+    # https://zou.cg-wire.com/
+    # https://api-docs.kitsu.cloud/
+    # "zou", ?
+    # - [](https://discord.com/channels/331817093244780555/719530656149012522/1500412928598343871)
     "OpenStudioLandscapes-DagsterCodeLocation-StreamingProcess @ git+https://github.com/michimussato/OpenStudioLandscapes-DagsterCodeLocation-StreamingProcess.git",
 ]
 
