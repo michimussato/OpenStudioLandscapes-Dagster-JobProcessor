@@ -640,6 +640,11 @@ def job_title(
         context: AssetExecutionContext,
         job_model: JobBase,
 ) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
+    """
+    Create job title from the job_file:
+    /data/share/AWSPortalRoot1/fixtures/houdini/project/vivi_025.usd_rop1.usda
+    -> vivi_025
+    """
 
     base, first_dot, rest = job_model.job_file.name.partition(".")
 
@@ -708,8 +713,7 @@ def task_name(
     )
 
 
-@asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
+@multi_asset(
     ins={
         "version": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "version"]),
@@ -735,9 +739,21 @@ def task_name(
         "cut_out": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "cut_out"])
         ),
-    }
+    },
+    outs={
+        "job_title_str": AssetOut(
+            **ASSET_HEADER_JOB_PROCESSOR,
+            dagster_type=str,
+            description="Todo",
+        ),
+        "batch_name": AssetOut(
+            **ASSET_HEADER_JOB_PROCESSOR,
+            dagster_type=str,
+            description="Todo",
+        ),
+    },
 )
-def job_title_str(
+def deadline_job_str(
         context: AssetExecutionContext,
         version: str,
         CONFIG: DefaultConstants,
@@ -757,40 +773,48 @@ def job_title_str(
             entity_name = f'{entity_name} - {str(job_model.handles)}_{str(cut_in).zfill(CONFIG.PADDING)}-{str(cut_out).zfill(CONFIG.PADDING)}_{job_model.handles}'
             # entity_name = f'{self.sequence_name}_{self.entity_name} - {str(self.handles)}_{str(self.frame_start).zfill(self.PADDING)}-{str(self.frame_end).zfill(self.PADDING)}_{self.handles}'
 
-    ret = f'{show_name} - {entity_name} - {task_name} - {job_model.job_file.name} - {version} - {pathlib.Path(job_model.plugin_model.executable).name}'
+    job_title_str = f'{show_name} - {entity_name} - {task_name} - {job_model.job_file.name} - {version} - {pathlib.Path(job_model.plugin_model.executable).name}'
 
-    yield Output(ret)
+    #################
+    # job_title_str #
+    #################
 
-    yield AssetMaterialization(
-        asset_key=context.asset_key,
-        metadata={
-            "__".join(context.asset_key.path): MetadataValue.text(ret)
-        }
+    output_name = "job_title_str"
+
+    yield Output(
+        output_name=output_name,
+        value=job_title_str,
     )
 
+    yield AssetMaterialization(
+        asset_key=context.asset_key_for_output(output_name),
+        metadata={
+            "__".join(
+                context.asset_key_for_output(output_name).path
+            ): MetadataValue.path(job_title_str),
+        },
+    )
 
-@asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
-    ins={
-        "job_title_str": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_title_str"]),
-        ),
-    }
-)
-def batch_name(
-        context: AssetExecutionContext,
-        job_title_str: str
-) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
+    ##############
+    # batch_name #
+    ##############
 
-    ret = f"Batch: {job_title_str}"
+    batch_name = f"Batch: {job_title_str}"
 
-    yield Output(ret)
+    output_name = "batch_name"
+
+    yield Output(
+        output_name=output_name,
+        value=batch_name,
+    )
 
     yield AssetMaterialization(
-        asset_key=context.asset_key,
+        asset_key=context.asset_key_for_output(output_name),
         metadata={
-            "__".join(context.asset_key.path): MetadataValue.text(ret)
-        }
+            "__".join(
+                context.asset_key_for_output(output_name).path
+            ): MetadataValue.path(batch_name),
+        },
     )
 
 
