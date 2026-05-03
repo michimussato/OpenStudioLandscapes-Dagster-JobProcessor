@@ -1,4 +1,4 @@
-from six import text_typefrom tkinter import image_types[![ Logo OpenStudioLandscapes ](https://github.com/michimussato/OpenStudioLandscapes/raw/main/media/images/logo128.png)](https://github.com/michimussato/OpenStudioLandscapes)
+[![ Logo OpenStudioLandscapes ](https://github.com/michimussato/OpenStudioLandscapes/raw/main/media/images/logo128.png)](https://github.com/michimussato/OpenStudioLandscapes)
 
 ---
 
@@ -7,7 +7,9 @@ from six import text_typefrom tkinter import image_types[![ Logo OpenStudioLands
   * [Install into OpenStudioLandscapes-Dagster](#install-into-openstudiolandscapes-dagster)
   * [Demo Jobs](#demo-jobs)
     * [Blender](#blender)
-  * [Development/Debugging in Docker Container (OpenStudioLandscapes)](#developmentdebugging-in-docker-container-openstudiolandscapes)
+  * [Development/Debugging](#developmentdebugging)
+    * [With Isolated Code Location](#with-isolated-code-location)
+    * [In Docker Container (OpenStudioLandscapes)](#in-docker-container-openstudiolandscapes)
 <!-- TOC -->
 
 ---
@@ -52,7 +54,13 @@ cut_in: 1201  # frame_start
 cut_out: 1250  # frame_end
 ```
 
-## Development/Debugging in Docker Container (OpenStudioLandscapes)
+## Development/Debugging
+
+### With Isolated Code Location
+
+- [dagster_job_processor](src/OpenStudioLandscapes/DagsterCodeLocation/JobProcessor/dagster_job_processor/README.md)
+
+### In Docker Container (OpenStudioLandscapes)
 
 > [!NOTE]
 > 

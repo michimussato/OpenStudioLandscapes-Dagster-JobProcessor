@@ -24,13 +24,15 @@ from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.jo
 
 # TODO
 #  - [ ] rename to generate_job_submission_scripts
-#  - [ ] multi_asset for
+#  - [x] multi_asset for
 #        - render_output_directory
-#        - render_output_filename
+#        - ~~render_output_filename~~ -> is a Dict
 #        - render_version_directory
-#  - [ ] multi_asset for
-#        - job_title
+#        - version
+#  - [x] multi_asset for
+#        - ~~job_title~~
 #        - job_title_str
+#        - batch_name
 #  - [x] multi_asset for
 #        - frame_start
 #        - frame_end
@@ -370,22 +372,88 @@ def get_kitsu_task_dict(
 #     )
 
 
-@asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
+@multi_asset(
     ins={
+        "job_model": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"])
+        ),
+        "get_kitsu_task_dict": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_PREPROCESSOR_KITSU["key_prefix"], "get_kitsu_task_dict"])
+        ),
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
         ),
-        "render_version_directory": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_version_directory"]),
+        "show_name": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "show_name"]),
+        ),
+        "task_name": AssetIn(
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "task_name"]),
+        ),
+    },
+    outs={
+        "render_version_directory": AssetOut(
+            **ASSET_HEADER_JOB_PROCESSOR,
+            dagster_type=pathlib.Path,
+            description="The render base directory "
+                        "where the version increments will be "
+                        "created.",
+        ),
+        "version": AssetOut(
+            **ASSET_HEADER_JOB_PROCESSOR,
+            dagster_type=pathlib.Path,
+            description="The render base directory "
+                        "where the version increments will be "
+                        "created.",
+        ),
+        "render_output_directory": AssetOut(
+            **ASSET_HEADER_JOB_PROCESSOR,
+            dagster_type=pathlib.Path,
+            description="The full directory of a version "
+                        "based on the `render_version_directory`.",
         ),
     },
 )
-def version(
+def calc_render_output_directory(
         context: AssetExecutionContext,
+        job_model: JobBase,
+        get_kitsu_task_dict: Dict,
+        show_name: str,
+        task_name: str,
         CONFIG: DefaultConstants,
-        render_version_directory: pathlib.Path,
-) -> Generator[Output[str] | AssetMaterialization | Any, Any, None]:
+) -> Generator[Output[pathlib.Path] | AssetMaterialization | Any, Any, None]:
+
+    ############################
+    # render_version_directory #
+    ############################
+
+    # TODO: make this fail safe
+    entity_name = get_entity_name(get_kitsu_task_dict)
+
+    entity_type = get_entity_type(get_kitsu_task_dict)
+
+    render_version_directory = pathlib.Path(f'{CONFIG.OUTPUT_ROOT}/{show_name}/{entity_type}/{entity_name}/{task_name}/')
+    render_version_directory.mkdir(parents=True, exist_ok=True)
+
+    output_name = "render_version_directory"
+
+    yield Output(
+        output_name=output_name,
+        value=render_version_directory,
+    )
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key_for_output(output_name),
+        metadata={
+            "__".join(
+                context.asset_key_for_output(output_name).path
+            ):  MetadataValue.path(render_version_directory),
+        },
+    )
+
+    ###########
+    # version #
+    ###########
+
     # This directory must exist in order for it to be iterable
 
     pattern = re.compile(f"^[0-9]{{{CONFIG.PADDING_VERSION}}}")
@@ -398,90 +466,26 @@ def version(
     new_version_dir = pathlib.Path(f"{render_version_directory}/{new_version}")
     new_version_dir.mkdir(parents=True, exist_ok=True)
 
-    yield Output(new_version)
+    output_name = "version"
 
-    yield AssetMaterialization(
-        asset_key=context.asset_key,
-        metadata={
-            "__".join(context.asset_key.path): MetadataValue.text(new_version),
-            "dirs": MetadataValue.json(dirs),
-        }
+    yield Output(
+        output_name=output_name,
+        value=new_version,
     )
 
+    yield AssetMaterialization(
+        asset_key=context.asset_key_for_output(output_name),
+        metadata={
+            "__".join(
+                context.asset_key_for_output(output_name).path
+            ): MetadataValue.text(new_version),
+            "dirs": MetadataValue.json(dirs),
+        },
+    )
 
-# @multi_asset(
-#     ins={
-#         "version": AssetIn(
-#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "version"]),
-#         ),
-#         "job_model": AssetIn(
-#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], ""]),
-#         ),
-#         "get_kitsu_task_dict": AssetIn(
-#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "get_kitsu_task_dict"]),
-#         ),
-#         "CONFIG": AssetIn(
-#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
-#         ),
-#         "job_title": AssetIn(
-#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "job_title"]),
-#         ),
-#         "output_format": AssetIn(
-#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "output_format"]),
-#         ),
-#         "show_name": AssetIn(
-#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "show_name"]),
-#         ),
-#         "task_name": AssetIn(
-#             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "task_name"]),
-#         ),
-#     },
-#     outs={
-#         "render_output_directory": AssetOut(
-#             **ASSET_HEADER_JOB_PROCESSOR,
-#             dagster_type=pathlib.Path,
-#             description="Todo",
-#         ),
-#         "render_output_filename": AssetOut(
-#             **ASSET_HEADER_JOB_PROCESSOR,
-#             dagster_type=Dict[str, str],
-#             description="Todo",
-#         ),
-#         "render_version_directory": AssetOut(
-#             **ASSET_HEADER_JOB_PROCESSOR,
-#             dagster_type=pathlib.Path,
-#             description="Todo",
-#         ),
-#     },
-# )
-
-
-@asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
-    ins={
-        "version": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "version"]),
-        ),
-        "job_model": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"])
-        ),
-        "render_version_directory": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_version_directory"])
-        ),
-        "get_kitsu_task_dict": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_PREPROCESSOR_KITSU["key_prefix"], "get_kitsu_task_dict"])
-        ),
-    }
-)
-def render_output_directory(
-        context: AssetExecutionContext,
-        version: str,
-        job_model: JobBase,
-        render_version_directory: pathlib.Path,
-        get_kitsu_task_dict: Dict,
-) -> Generator[Output[pathlib.Path] | AssetMaterialization | Any, Any, None]:
-
-    # handles = job_model.handles
+    ###########################
+    # render_output_directory #
+    ###########################
 
     render_output_directory = render_version_directory.joinpath(version)
 
@@ -493,9 +497,9 @@ def render_output_directory(
         entity_type = get_entity_type(get_kitsu_task_dict)
         if entity_type == 'Shot':
             # filename = f'{str(handles)}_{str(job_model.cut_in - job_model.handles).zfill(CONFIG.PADDING)}-{str(job_model.cut_out + job_model.handles).zfill(CONFIG.PADDING)}_{str(handles)}'
-            # with open(_out / filename, "w") as fw:
+            # with open(render_version_directory / filename, "w") as fw:
             #     fw.write(f"{str(job_model.kitsu_task) = }")
-            # with open(_out / "kitsu_task_id.txt", "w") as fw:
+            # with open(render_version_directory / "kitsu_task_id.txt", "w") as fw:
             #     fw.write(str(job_model.kitsu_task))
             with open(kitsu_task_json, "w") as fw:
                 json.dump(
@@ -507,16 +511,21 @@ def render_output_directory(
                     sort_keys=True,
                 )
 
-    # _out.mkdir(parents=True, exist_ok=True)
+    output_name = "render_output_directory"
 
-    yield Output(render_output_directory)
+    yield Output(
+        output_name=output_name,
+        value=render_output_directory,
+    )
 
     yield AssetMaterialization(
-        asset_key=context.asset_key,
+        asset_key=context.asset_key_for_output(output_name),
         metadata={
-            "__".join(context.asset_key.path): MetadataValue.path(render_output_directory),
+            "__".join(
+                context.asset_key_for_output(output_name).path
+            ): MetadataValue.path(render_output_directory),
             "kitsu_task_json": MetadataValue.path(kitsu_task_json),
-        }
+        },
     )
 
 
@@ -581,49 +590,6 @@ def render_output_filename(
             "__".join(context.asset_key.path): MetadataValue.md(
                 f"```json\n{json.dumps(ret, indent=2, default=str, sort_keys=True)}\n```"
             ),
-        }
-    )
-
-
-@asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
-    ins={
-        "get_kitsu_task_dict": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_PREPROCESSOR_KITSU["key_prefix"], "get_kitsu_task_dict"])
-        ),
-        "show_name": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "show_name"]),
-        ),
-        "task_name": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "task_name"]),
-        ),
-        "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "CONFIG"]),
-        ),
-    },
-)
-def render_version_directory(
-        context: AssetExecutionContext,
-        get_kitsu_task_dict: Dict,
-        show_name: str,
-        task_name: str,
-        CONFIG: DefaultConstants,
-) -> Generator[Output[pathlib.Path] | AssetMaterialization | Any, Any, None]:
-
-    # TODO: make this fail safe
-    entity_name = get_entity_name(get_kitsu_task_dict)
-
-    entity_type = get_entity_type(get_kitsu_task_dict)
-
-    _out = pathlib.Path(f'{CONFIG.OUTPUT_ROOT}/{show_name}/{entity_type}/{entity_name}/{task_name}/')
-    _out.mkdir(parents=True, exist_ok=True)
-
-    yield Output(_out)
-
-    yield AssetMaterialization(
-        asset_key=context.asset_key,
-        metadata={
-            "__".join(context.asset_key.path): MetadataValue.path(_out),
         }
     )
 
