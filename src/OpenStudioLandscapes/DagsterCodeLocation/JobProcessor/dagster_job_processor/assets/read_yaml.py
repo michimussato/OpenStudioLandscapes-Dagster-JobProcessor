@@ -549,12 +549,6 @@ def calc_render_output_directory(
         "output_format": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "output_format"])
         ),
-        # "frame_start_absolute": AssetIn(
-        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_start_absolute"])
-        # ),
-        # "frame_end_absolute": AssetIn(
-        #     AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "frame_end_absolute"])
-        # ),
     },
 )
 def render_output_filename(
@@ -563,9 +557,10 @@ def render_output_filename(
         job_model: JobBase,
         job_title: str,
         output_format: str,
-        # frame_start_absolute: int,
-        # frame_end_absolute: int,
 ) -> Generator[Output[Dict[str, str]] | AssetMaterialization | Any, Any, None]:
+
+    # Todo
+    #  - [ ] this is a bit ugly (eval...). find a better way
 
     # padding_bash_expansion = "{%i..%i}" % (frame_start_absolute, frame_end_absolute)
     padding_deadline = f"{job_model.plugin_model.padding_deadline}"
@@ -1017,12 +1012,21 @@ def fps(
     # if bool(read_job_py["kitsu_task"]):
     fps_job = job_model.fps
 
-    fps_kitsu_project = float(get_kitsu_task_dict.get("project", {}).get("fps", 0))
+    fps_kitsu_project = float(get_kitsu_task_dict
+                              .get("project", {})
+                              .get("fps", 0)
+                              )
 
     kitsu_entity_type = get_entity_type(get_kitsu_task_dict)
     fps_kitsu_shot = float(0)
     if kitsu_entity_type == "Shot":
-        fps_kitsu_entity = fps_kitsu_shot = float(get_kitsu_task_dict.get("entity", {}).get("data", {}).get("fps", 0))
+        # Todo:
+        #  - [ ] why not used?
+        fps_kitsu_entity = fps_kitsu_shot = float(get_kitsu_task_dict
+                                                  .get("entity", {})
+                                                  .get("data", {})
+                                                  .get("fps", 0)
+                                                  )
 
     yield Output(fps_job)
 
@@ -1051,6 +1055,9 @@ def output_format(
         context: AssetExecutionContext,
         job_model: JobBase,
 ) -> Generator[Output[Any] | AssetMaterialization | Any, Any, None]:
+
+    # Todo:
+    #  - [ ] completely obsolete?
 
     # if read_job_py["output_format"] is None:
     #     raise ValueError("output_format is not defined.")
@@ -1109,7 +1116,7 @@ def job_info(
 
     # https://docs.thinkboxsoftware.com/products/deadline/10.2/1_User%20Manual/manual/manual-submission.html#job-info-file-options
     # render_output_directory.mkdir(parents=True, exist_ok=True)
-    path = render_output_directory / "jobinfo_info.txt"
+    path = render_output_directory.joinpath("jobinfo_info.txt")
 
     context.log.debug(f"{path = }")
 
@@ -1193,7 +1200,7 @@ def plugin_info(
 
     # https://docs.thinkboxsoftware.com/products/deadline/10.2/1_User%20Manual/manual/manual-submission.html#plug-in-info-file
     # render_output_directory.mkdir(parents=True, exist_ok=True)
-    path = pathlib.Path(f"{render_output_directory}/plugin_info.txt")
+    path = render_output_directory.joinpath("plugin_info.txt")
 
     context.log.debug(f"{path = }")
 
@@ -1252,7 +1259,7 @@ def archive_job_yaml(
     except FileNotFoundError as e:
         context.log.warning(f"Job YAML file {job_yaml} not found: {e}")
 
-    ret = pathlib.Path(render_output_directory) / job_yaml.name
+    ret = render_output_directory.joinpath(job_yaml.name)
 
     if not ret.exists():
         raise FileNotFoundError(f"Job YAML file {job_yaml.name} could not be found in {render_output_directory}")
