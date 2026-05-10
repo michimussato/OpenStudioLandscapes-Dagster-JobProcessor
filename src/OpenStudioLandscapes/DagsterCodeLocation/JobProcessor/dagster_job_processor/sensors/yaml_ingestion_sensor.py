@@ -43,8 +43,16 @@ def yaml_ingestion_sensor(
         ".yaml",
     ]
 
-    if any(CONFIG.INPUT_ROOT_PROCESSING.iterdir()):
-        context.log.warning(f"A file is still being processed...")
+    p = path_to_submission_files.glob('*.*')
+    yaml_files = [x for x in p if x.is_file() and x.suffix in ext_yaml]
+
+    queue = sorted(yaml_files, key=os.path.getmtime)
+    context.log.info(f"{queue = }")
+
+    contents_processing = CONFIG.INPUT_ROOT_PROCESSING.iterdir()
+
+    if any(contents_processing):
+        context.log.warning(f"A file is still being processed: {list(contents_processing)}")
         # if there is a file in the .processing dir, don't
         # continue. Do one by one.
         # sorted(Path(dirpath).iterdir(), key=os.path.getmtime)
@@ -52,12 +60,6 @@ def yaml_ingestion_sensor(
 
     # for job_yaml in path_to_submission_files.glob('*.*'):
     # for job_yaml in sorted(path_to_submission_files.iterdir(), key=os.path.getmtime):
-
-    p = path_to_submission_files.glob('*.*')
-    yaml_files = [x for x in p if x.is_file() and x.suffix in ext_yaml]
-
-    queue = sorted(yaml_files, key=os.path.getmtime)
-    context.log.info(f"{queue = }")
     # fifo
     if not queue:
         context.log.info("Nothing to process.")
