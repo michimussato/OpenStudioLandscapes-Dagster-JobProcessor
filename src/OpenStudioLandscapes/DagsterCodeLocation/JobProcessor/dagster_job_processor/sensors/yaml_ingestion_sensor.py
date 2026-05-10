@@ -1,4 +1,5 @@
 import datetime
+import textwrap
 
 from dagster import (
     RunRequest,
@@ -24,11 +25,20 @@ CONFIG: DefaultConstants = DefaultConstants()
 
 
 # Todo:
-#  - [ ] sensor vs asset_sensor
+#  - [ ] sensor vs asset_sensor?
+#  - [ ] return None vs return SkipReason?
 @sensor(
     job=ingest_yaml_job,
     default_status=DefaultSensorStatus.RUNNING,
     minimum_interval_seconds=15,
+    description=textwrap.dedent(
+        """
+        Initiate a job to materialize all pre-processor assets
+        and send jobs based on their results to the farm (ShotProcessor).
+        Once all jobs are sent to the farm, a cleanup job will initiate
+        some house-keeping (`archive_yaml_job`).
+        """
+    ),
 )
 def yaml_ingestion_sensor(
         context: SensorEvaluationContext,

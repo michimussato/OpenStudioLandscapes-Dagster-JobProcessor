@@ -4,7 +4,6 @@ from dagster import (
     multi_asset_sensor,
     AssetKey,
     RunRequest,
-    SkipReason,
     DefaultSensorStatus,
 )
 
