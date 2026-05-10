@@ -2,6 +2,7 @@ import enum
 import pathlib
 import re
 import shutil
+import json
 
 import requests
 from typing import Any, Generator, Dict
@@ -14,12 +15,18 @@ from dagster import (
     AssetKey, multi_asset, AssetOut,
     RetryPolicy, Backoff, Jitter,
 )
-import json
 
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.config.models import DefaultConstants
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.resources.kitsu_resource import KitsuResource
-from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.jobs.job_base import JobBase, Resolution
+from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.jobs.job_base import JobBase  # , Resolution
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.deadline_templates.jobs import models_submission
+
+from OpenStudioLandscapes.DagsterCodeLocation.ShotProcessor.jobs.exr_to_png import ASSET_HEADER as ASSET_HEADER_OIIO_PROCESSOR_EXR_TO_PNG
+from OpenStudioLandscapes.DagsterCodeLocation.ShotProcessor.jobs.exr_with_custom_metadata import ASSET_HEADER as ASSET_HEADER_OIIO_PROCESSOR_EXR_WITH_CUSTOM_METADATA
+from OpenStudioLandscapes.DagsterCodeLocation.ShotProcessor.jobs.handle_overlay import ASSET_HEADER as ASSET_HEADER_OIIO_PROCESSOR_HANDLE_OVERLAY
+from OpenStudioLandscapes.DagsterCodeLocation.ShotProcessor.jobs.mov_to_kitsu import ASSET_HEADER as ASSET_HEADER_OIIO_PROCESSOR_MOV_TO_KITSU
+from OpenStudioLandscapes.DagsterCodeLocation.ShotProcessor.jobs.png_to_mov import ASSET_HEADER as ASSET_HEADER_OIIO_PROCESSOR_PNG_TO_MOV
+from OpenStudioLandscapes.DagsterCodeLocation.ShotProcessor.jobs.text_overlay import ASSET_HEADER as ASSET_HEADER_OIIO_PROCESSOR_TEXT_OVERLAY
 
 
 # TODO
@@ -1236,12 +1243,26 @@ def plugin_info(
     **ASSET_HEADER_JOB_PROCESSOR,
     ins={
         "render_output_directory": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"])
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"]),
         ),
         "job_model": AssetIn(
-            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"])
+            AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"]),
         ),
-    }
+    },
+    deps=[
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_EXR_TO_PNG["key_prefix"], "job"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_EXR_TO_PNG["key_prefix"], "job_id"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_EXR_WITH_CUSTOM_METADATA["key_prefix"], "job"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_EXR_WITH_CUSTOM_METADATA["key_prefix"], "job_id"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_HANDLE_OVERLAY["key_prefix"], "job"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_HANDLE_OVERLAY["key_prefix"], "job_id"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_MOV_TO_KITSU["key_prefix"], "job"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_MOV_TO_KITSU["key_prefix"], "job_id"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_PNG_TO_MOV["key_prefix"], "job"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_PNG_TO_MOV["key_prefix"], "job_id"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_TEXT_OVERLAY["key_prefix"], "job"]),
+        AssetKey([*ASSET_HEADER_OIIO_PROCESSOR_TEXT_OVERLAY["key_prefix"], "job_id"]),
+    ],
 )
 def archive_job_yaml(
         context: AssetExecutionContext,
