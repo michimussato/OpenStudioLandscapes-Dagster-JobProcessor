@@ -37,8 +37,10 @@ class DefaultConstants(BaseModel):
         ),
     )
     @property
-    def INPUT_ROOT_PROCESSED(self) -> pathlib.Path:
-        return self.INPUT_ROOT.joinpath(".processing")
+    def INPUT_ROOT_PROCESSING(self) -> pathlib.Path:
+        processing_dir = self.INPUT_ROOT.joinpath(".processing")
+        processing_dir.mkdir(parents=True, exist_ok=True)
+        return processing_dir
 
     PADDING: int = Field(
         default=4,
