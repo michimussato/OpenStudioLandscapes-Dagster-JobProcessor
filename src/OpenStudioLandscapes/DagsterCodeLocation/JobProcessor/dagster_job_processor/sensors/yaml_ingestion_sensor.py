@@ -7,6 +7,7 @@ from dagster import (
     sensor,
     SensorEvaluationContext,
     DefaultSensorStatus,
+    SkipReason,
 )
 
 import os
@@ -56,14 +57,14 @@ def yaml_ingestion_sensor(
         # if there is a file in the .processing dir, don't
         # continue. Do one by one.
         # sorted(Path(dirpath).iterdir(), key=os.path.getmtime)
-        return None
+        return SkipReason(f"A file is still being processed: {list(contents_processing)}")
 
     # for job_yaml in path_to_submission_files.glob('*.*'):
     # for job_yaml in sorted(path_to_submission_files.iterdir(), key=os.path.getmtime):
     # fifo
     if not queue:
-        context.log.info("Nothing to process.")
-        return None
+        context.log.info("Nothing to process; queue is empty.")
+        return SkipReason("Nothing to process; queue is empty.")
 
     # while queue:
     next_ = queue.pop(0)

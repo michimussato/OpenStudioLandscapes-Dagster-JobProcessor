@@ -8,6 +8,7 @@ from dagster import (
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.assets import read_yaml
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.resources.kitsu_resource import KitsuResource
 from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.sensors.yaml_ingestion_sensor import yaml_ingestion_sensor
+from OpenStudioLandscapes.DagsterCodeLocation.JobProcessor.dagster_job_processor.sensors.archive_yaml_sensor import archive_yaml_sensor
 
 read_yaml_assets = load_assets_from_modules(
     modules=[read_yaml],
@@ -19,6 +20,7 @@ read_yaml_assets = load_assets_from_modules(
 
 all_sensors = [
     yaml_ingestion_sensor,
+    archive_yaml_sensor,
 ]
 
 

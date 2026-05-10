@@ -4,6 +4,16 @@ from typing import List
 from pydantic import BaseModel, Field
 
 
+# Todo:
+#  - [ ] incorrect render frame range
+#        Expected:
+#          frame_start: 1051
+#          frame_end: 1100
+#          chunk_size: 10
+#        Actual:
+#          997-1104
+
+
 class PluginBase(BaseModel):
     executable: pathlib.Path = Field(
         default=None,
