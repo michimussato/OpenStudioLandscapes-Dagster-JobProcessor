@@ -36,48 +36,74 @@ def yaml_ingestion_sensor(
 
     runs_to_request = []
 
-    moves = []
+    # moves = []
 
     ext_yaml = [
         ".yml",
         ".yaml",
     ]
 
-    for job_yaml in path_to_submission_files.glob('*.*'):
+    if any(CONFIG.INPUT_ROOT_PROCESSING.iterdir()):
+        context.log.warning(f"A file is still being processed...")
+        # if there is a file in the .processing dir, don't
+        # continue. Do one by one.
+        # sorted(Path(dirpath).iterdir(), key=os.path.getmtime)
+        return None
 
-        if job_yaml.suffix in ext_yaml:
+    # for job_yaml in path_to_submission_files.glob('*.*'):
+    # for job_yaml in sorted(path_to_submission_files.iterdir(), key=os.path.getmtime):
 
-            context.log.info(f'Checking {job_yaml}...')
+    p = path_to_submission_files.glob('*.*')
+    yaml_files = [x for x in p if x.is_file() and x.suffix in ext_yaml]
 
-            context.log.info(f'Submission file is new: {job_yaml}...')
+    queue = sorted(yaml_files, key=os.path.getmtime)
+    context.log.info(f"{queue = }")
+    # fifo
+    if not queue:
+        context.log.info("Nothing to process.")
+        return None
 
-            CONFIG.INPUT_ROOT_PROCESSED.mkdir(mode=0o777, exist_ok=True, parents=True)
-            output_file = CONFIG.INPUT_ROOT_PROCESSED / f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S_%f")}_{job_yaml.name}'
-            # shutil.move(job_py, output_file)
+    # while queue:
+    next_ = queue.pop(0)
+    # context.log.info(f"Processing {next_}...")
+        # if next_.suffix in ext_yaml:
+        #     break
 
-            context.log.info(f'{output_file = }...')
-            # context.log.info(f'{constants.INPUT_ROOT_PROCESSED = }...')
-            context.log.info(f'{job_yaml = }...')
+    # for job_yaml in sorted(path_to_submission_files.glob("*.*"), key=os.path.getmtime):
 
-            runs_to_request.append(RunRequest(
-                # whether or not a run will skip is based on the run_key that was assigned to previous ones
-                run_key=f"ingested_jobs__{datetime.datetime.timestamp(datetime.datetime.now())}__{str(job_yaml).replace(os.sep, '__')}",
-                run_config={
-                    "ops": {
-                        AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"]).to_python_identifier(): {
-                            "config": {
-                                "filename": str(output_file),
-                                }
-                            }
+        # if job_yaml.suffix in ext_yaml:
+
+    context.log.info(f'Checking {next_}...')
+
+    context.log.info(f'Submission file is new: {next_}...')
+
+    # CONFIG.INPUT_ROOT_PROCESSED.mkdir(mode=0o777, exist_ok=True, parents=True)
+    output_file = CONFIG.INPUT_ROOT_PROCESSING / f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S_%f")}_{next_.name}'
+    # shutil.move(job_py, output_file)
+
+    context.log.info(f'{output_file = }...')
+    # context.log.info(f'{constants.INPUT_ROOT_PROCESSED = }...')
+    context.log.info(f'{next_ = }...')
+
+    runs_to_request.append(RunRequest(
+        # whether or not a run will skip is based on the run_key that was assigned to previous ones
+        run_key=f"ingested_jobs__{datetime.datetime.timestamp(datetime.datetime.now())}__{str(next_).replace(os.sep, '__')}",
+        run_config={
+            "ops": {
+                AssetKey([*ASSET_HEADER_JOB_PROCESSOR_READER["key_prefix"], "read_job_yaml"]).to_python_identifier(): {
+                    "config": {
+                        "filename": str(output_file),
                         }
                     }
-                )
-            )
+                }
+            }
+        )
+    )
 
-            moves.append({'src': job_yaml, 'dst': output_file})
+    # moves.append({'src': next_, 'dst': output_file})
 
-    for i in moves:
-        shutil.move(i['src'], i['dst'])
+    # for i in moves:
+    shutil.move(next_, output_file)
 
     return SensorResult(
         run_requests=runs_to_request,
