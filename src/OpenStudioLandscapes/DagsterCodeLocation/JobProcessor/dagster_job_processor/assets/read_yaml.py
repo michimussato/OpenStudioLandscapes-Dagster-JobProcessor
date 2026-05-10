@@ -69,6 +69,16 @@ ASSET_HEADER_JOB_PROCESSOR = {
 }
 
 
+GROUP_JOB_POSTPROCESSOR = "OpenStudioLandscapes_DagsterCodeLocation_JobProcessor_PostProcessor"
+# KEY_CONSTANTS_DEFAULT = [GROUP_CONSTANTS_DEFAULT, "Constants"]
+KEY_JOB_POSTPROCESSOR = [GROUP_JOB_POSTPROCESSOR]
+
+ASSET_HEADER_JOB_POSTPROCESSOR = {
+    "group_name": GROUP_JOB_POSTPROCESSOR,
+    "key_prefix": KEY_JOB_POSTPROCESSOR,
+}
+
+
 GROUP_JOB_PROCESSOR_PREPROCESSOR_KITSU = "OpenStudioLandscapes_DagsterCodeLocation_JobProcessor_Kitsu"
 # KEY_CONSTANTS_DEFAULT = [GROUP_CONSTANTS_DEFAULT, "Constants"]
 KEY_JOB_PROCESSOR_PREPROCESSOR_KITSU = [GROUP_JOB_PROCESSOR_PREPROCESSOR_KITSU]
@@ -1240,7 +1250,7 @@ def plugin_info(
 
 
 @asset(
-    **ASSET_HEADER_JOB_PROCESSOR,
+    **ASSET_HEADER_JOB_POSTPROCESSOR,
     ins={
         "render_output_directory": AssetIn(
             AssetKey([*ASSET_HEADER_JOB_PROCESSOR["key_prefix"], "render_output_directory"]),
